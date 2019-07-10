@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+    "version": "1.0",
+    "name": "Chrome Ripper Tools",
+    "description": "Tools for ripping data from web",
+    "icons": {
+        "16": "assets/img/icon/icon_16.png",
+        "48": "assets/img/icon/icon_48.png",
+        "128": "assets/img/icon/icon_128.png"
+    },
+    "browser_action": {
+        "default_icon": "assets/img/icon/icon_500.png",
+        "default_popup": "pages/popup/popup.html"
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    },
+    "permissions": [
+        "debugger",
+        "activeTab",
+        "tabs",
+        "webRequest",
+        "unlimitedStorage",
+        "<all_urls>"
+    ]
+}
