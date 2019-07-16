@@ -155,17 +155,37 @@ function waitAndClick(debuggeeId, selector, regex, timout) {
         .then(() => { return click(debuggeeId, selector) })
 }
 
-function waitRequest(regex) {
-
+function waitRequest(debuggeeId, regex, timout) {
+    return new Promise(function (resolve, reject) {
+        let filter = {
+            urls: [regex]
+        }
+        let onCompleted = (details) => {
+            if (details.tabId == debuggeeId.tabId) {
+                window.clearInterval(intervalID)
+                chrome.devtools.network.onRequestFinished.removeListener(onCompleted)
+            }
+        }
+        chrome.devtools.network.onRequestFinished.addListener(onCompleted, filter)
+        var intervalID = window.setInterval(() => {
+            chrome.devtools.network.onRequestFinished.removeListener(onCompleted)
+            reject(new Error("waitRequest timeout regex: " + regex))
+        }, timout)
+    })
 }
 
 //main
 function main() {
     chrome.debugger.onDetach.addListener(onDetach);
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        if (request.command == "start") {
-            sendResponse({ message: "started: " + request.targetTab.id });
-            return start(request.targetTab)
+        switch (request.command) {
+            case "start":
+                sendResponse({ message: "started: " + request.targetTab.id });
+                return start(request.targetTab)
+                break;
+            case "abort":
+                alert("TODO: implement abortion")
+                break;
         }
     })
 }

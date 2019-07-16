@@ -1,0 +1,1 @@
+chrome.devtools.panels.create("Chrome Ripper", null, 'pages/panel/panel.html');

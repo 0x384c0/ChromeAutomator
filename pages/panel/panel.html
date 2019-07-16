@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Panel</title>
+    <link rel="stylesheet" type="text/css" href="panel.css">
+    <script src="../../libs/vue.js"></script>
+</head>
+
+<body>
+    <div>Panel</div>
+    <button id="start_button" class="start_button" v-on:click="click">Start bot</button>
+    <div id="message_element" class="pre-formatted"> {{ text }} </div>
+
+    <div id="regex_input">
+        <input v-model="text" placeholder="URL regex">
+    </div>
+    <button id="start_listening_button" class="start_button" v-on:click="click">Start listening</button>
+    <button id="stop_listening_button" class="start_button" v-on:click="click">Stop listening</button>
+    <div id="request_logs_element" class="pre-formatted"> {{ text }} </div>
+
+
+
+    <script src="panel.js"></script>
+</body>
+
+</html>
