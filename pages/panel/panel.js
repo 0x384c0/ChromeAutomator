@@ -1,5 +1,9 @@
 // utils
-let clicker = new Clicker()
+let clicker = new Clicker(async clicker => {
+  await clicker.currentTab_click("div[class='vjs-play-control vjs-control ']");
+  await clicker.currentTab_wait("div[class='skip-button']", "^Пропустить рекламу$", 25000);
+  console.log("Finished");
+})
 let requestListener = new RequestListener(
   (url, body) => { request_logs_element.text += url + "\n" }
 )

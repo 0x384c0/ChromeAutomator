@@ -21,12 +21,12 @@ class Clicker {
             });
         });
     }
-  
+
     //debugger
-  
+
     attached = false
     version = "1.2"
-  
+
     connectDebugger(tab) {
         return new Promise((resolve, reject) => {
             var tabId = tab.id;
@@ -48,10 +48,10 @@ class Clicker {
     onDetach(debuggeeId) {
         this.attached = false
     }
-  
-  
+
+
     // internal utils
-  
+
     setIntervalX(delay, repetitions, callback, finished) {
         var x = 0;
         var intervalID = window.setInterval(() => {
@@ -63,11 +63,11 @@ class Clicker {
         }, delay);
         return () => { window.clearInterval(intervalID) }
     }
-  
+
     sleep(ms) {
         return new Promise((resolve, reject) => { window.setTimeout(resolve, ms); });
     }
-  
+
     clickSelector(target, selector) {
         return this.sendCommand(target, 'DOM.getDocument')
             .then((rootNode) => {
@@ -100,17 +100,17 @@ class Clicker {
                     });
             });
     }
-  
+
     catchError(e) {
         console.log(e)
         alert(e.message)
     }
-  
+
     //utils
     click(debuggeeId, selector) {
         return this.clickSelector(debuggeeId, selector)
     }
-  
+
     exists(debuggeeId, selector, regex) {
         let code = "document.querySelector(\"" + selector + "\").innerText"
         return this.executeScript(debuggeeId.tabId, { code: code })
@@ -123,7 +123,7 @@ class Clicker {
                 return result
             })
     }
-  
+
     wait(debuggeeId, selector, regex, timout) {
         const delay = 1000
         const repetitions = timout / delay
@@ -145,14 +145,14 @@ class Clicker {
             )
         })
     }
-  
+
     waitAndClick(debuggeeId, selector, regex, timout) {
         return this.wait(debuggeeId, selector, regex, timout)
             .catch(this.catchError)
             .then(() => { return this.sleep(500) })
             .then(() => { return this.click(debuggeeId, selector) })
     }
-  
+
     waitRequest(debuggeeId, regex, timout) {
         return new Promise((resolve, reject) => {
             let filter = {
@@ -171,25 +171,39 @@ class Clicker {
             }, timout)
         })
     }
-  
+
+    //active tab wrappers
+    currentTab_click(selector) {
+        return this.click(this.currentTabDebuggeeId, selector)
+    }
+    currentTab_exists(selector, regex) {
+        return this.exists(this.currentTabDebuggeeId, selector, regex)
+    }
+    currentTab_wait(selector, regex, timout) {
+        return this.wait(this.currentTabDebuggeeId, selector, regex, timout)
+    }
+    currentTab_waitAndClick(selector, regex, timout) {
+        return this.waitAndClick(this.currentTabDebuggeeId, selector, regex, timout)
+    }
+    currentTab_waitRequest(regex, timout) {
+        return this.waitRequest(this.currentTabDebuggeeId, regex, timout)
+    }
+
     //main
-    constructor() {
+    constructor(taskHandler) {
+        this.taskHandler = taskHandler
         chrome.debugger.onDetach.addListener(this.onDetach);
     }
-  
+
     start(tab) {
         return this.connectDebugger(tab)
+            .catch(this.catchError)
             .then(debuggeeId => { this.exeucteTask(debuggeeId) })
             .catch(this.catchError)
     }
-  
-    exeucteTask(debuggeeId) {
-        return this.click(debuggeeId, "div[class='vjs-play-control vjs-control ']")
-            .then(() => {
-                return this.wait(debuggeeId, "div[class='skip-button']", "^Пропустить рекламу$", 25000)
-            })
-            .then(() => {
-                console.log("Finished")
-            })
+
+    async exeucteTask(debuggeeId) {
+        this.currentTabDebuggeeId = debuggeeId
+        await this.taskHandler(this)
     }
-  }
+}
