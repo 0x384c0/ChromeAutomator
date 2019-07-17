@@ -7,11 +7,29 @@ class Clicker {
             });
         });
     }
-    executeScript(tabId, target) {
+    executeScript(tabId, target, hrefRegex) {
+        console.log("executeScript target:" + target.code)
         return new Promise((resolve, reject) => {
-            chrome.tabs.executeScript(tabId, target, (response) => {
-                resolve(response);
-            });
+            if (typeof hrefRegex !== "undefined") {
+                console.log("executeScript sendMessage hrefRegex:" + hrefRegex)
+                chrome.tabs.sendMessage(
+                    chrome.devtools.inspectedWindow.tabId,
+                    { action: "executeScript", code: target.code, hrefRegex: hrefRegex },
+                    (response) => {
+                        window.clearInterval(intervalID)
+                        if (response instanceof Error)
+                            reject(response)
+                        else
+                            resolve(response)
+                    });
+                var intervalID = window.setInterval(() => {
+                    reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
+                }, 500);
+            } else {
+                chrome.tabs.executeScript(tabId, target, (response) => {
+                    resolve(response);
+                });
+            }
         });
     }
     sendMessage(tabId, message) {
@@ -68,37 +86,44 @@ class Clicker {
         return new Promise((resolve, reject) => { window.setTimeout(resolve, ms); });
     }
 
-    clickSelector(target, selector) {
-        return this.sendCommand(target, 'DOM.getDocument')
-            .then((rootNode) => {
-                var rootNodeId = rootNode.root.nodeId;
-                return this.sendCommand(target, 'DOM.querySelector', {
-                    nodeId: rootNodeId,
-                    selector: selector
-                })
-                    .then((node) => {
-                        return this.sendCommand(target, 'DOM.getBoxModel', node);
-                    })
-                    .then(({ model: model }) => {
-                        var border = model.border;
-                        var topLeftX = border[0];
-                        var topLeftY = border[1];
-                        var width = model.width;
-                        var height = model.height;
-                        var clickEvent = {
-                            type: 'mousePressed',
-                            x: topLeftX + Math.round(width / 2),
-                            y: topLeftY + Math.round(height / 2),
-                            button: 'left',
-                            clickCount: 1
-                        };
-                        return this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent)
-                            .then(() => {
-                                clickEvent.type = 'mouseReleased';
-                                return this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
-                            });
-                    });
+    async clickSelector(target, selector, hrefRegex) {
+        var coordinates = null
+        if (typeof hrefRegex !== "undefined") {
+            let rect = await this.executeScript(target.tabId, { code: "document.querySelector(\"" + selector + "\").getBoundingClientRect()" }, hrefRegex)
+            coordinates = {
+                x: rect.left + Math.round(rect.width / 2),
+                y: rect.top + Math.round(rect.height / 2)
+            }
+            console.log(rect)
+            console.log(coordinates)
+        } else {
+            const rootNode = await this.sendCommand(target, 'DOM.getDocument');
+            var rootNodeId = rootNode.root.nodeId;
+            const node = await this.sendCommand(target, 'DOM.querySelector', {
+                nodeId: rootNodeId,
+                selector: selector
             });
+            const { model: model } = await this.sendCommand(target, 'DOM.getBoxModel', node);
+            var border = model.border;
+            var topLeftX = border[0];
+            var topLeftY = border[1];
+            var width = model.width;
+            var height = model.height;
+            coordinates = {
+                x: topLeftX + Math.round(width / 2),
+                y: topLeftY + Math.round(height / 2)
+            }
+        }
+        var clickEvent = {
+            type: 'mousePressed',
+            x: coordinates.x,
+            y: coordinates.y,
+            button: 'left',
+            clickCount: 1
+        };
+        await this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
+        clickEvent.type = 'mouseReleased';
+        return this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
     }
 
     catchError(e) {
@@ -107,13 +132,13 @@ class Clicker {
     }
 
     //utils
-    click(debuggeeId, selector) {
-        return this.clickSelector(debuggeeId, selector)
+    click(debuggeeId, selector, hrefRegex) {
+        return this.clickSelector(debuggeeId, selector, hrefRegex)
     }
 
-    exists(debuggeeId, selector, regex) {
+    exists(debuggeeId, selector, regex, hrefRegex) {
         let code = "document.querySelector(\"" + selector + "\").innerText"
-        return this.executeScript(debuggeeId.tabId, { code: code })
+        return this.executeScript(debuggeeId.tabId, { code: code }, hrefRegex)
             .then((innerText) => {
                 let array = innerText.toString().match(regex)
                 let result = array != undefined && array != null && array.length != 0
@@ -124,13 +149,13 @@ class Clicker {
             })
     }
 
-    wait(debuggeeId, selector, regex, timout) {
+    wait(debuggeeId, selector, regex, timout, hrefRegex) {
         const delay = 1000
         const repetitions = timout / delay
         return new Promise((resolve, reject) => {
             var clearInterval = this.setIntervalX(delay, repetitions,
                 () => {
-                    this.exists(debuggeeId, selector, regex)
+                    this.exists(debuggeeId, selector, regex, hrefRegex)
                         .then((exists) => {
                             if (exists) {
                                 clearInterval()
@@ -146,11 +171,11 @@ class Clicker {
         })
     }
 
-    waitAndClick(debuggeeId, selector, regex, timout) {
-        return this.wait(debuggeeId, selector, regex, timout)
+    waitAndClick(debuggeeId, selector, regex, timout, hrefRegex) {
+        return this.wait(debuggeeId, selector, regex, timout, hrefRegex)
             .catch(this.catchError)
             .then(() => { return this.sleep(500) })
-            .then(() => { return this.click(debuggeeId, selector) })
+            .then(() => { return this.click(debuggeeId, selector, hrefRegex) })
     }
 
     waitRequest(debuggeeId, regex, timout) {
@@ -173,17 +198,20 @@ class Clicker {
     }
 
     //active tab wrappers
-    currentTab_click(selector) {
-        return this.click(this.currentTabDebuggeeId, selector)
+    currentTab_executeScript(code, hrefRegex) {
+        return this.executeScript(this.currentTabDebuggeeId.tabId, { code: code }, hrefRegex)
     }
-    currentTab_exists(selector, regex) {
-        return this.exists(this.currentTabDebuggeeId, selector, regex)
+    currentTab_click(selector, hrefRegex) {
+        return this.click(this.currentTabDebuggeeId, selector, hrefRegex)
     }
-    currentTab_wait(selector, regex, timout) {
-        return this.wait(this.currentTabDebuggeeId, selector, regex, timout)
+    currentTab_exists(selector, regex, hrefRegex) {
+        return this.exists(this.currentTabDebuggeeId, selector, regex, hrefRegex)
     }
-    currentTab_waitAndClick(selector, regex, timout) {
-        return this.waitAndClick(this.currentTabDebuggeeId, selector, regex, timout)
+    currentTab_wait(selector, regex, timout, hrefRegex) {
+        return this.wait(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
+    }
+    currentTab_waitAndClick(selector, regex, timout, hrefRegex) {
+        return this.waitAndClick(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
     }
     currentTab_waitRequest(regex, timout) {
         return this.waitRequest(this.currentTabDebuggeeId, regex, timout)

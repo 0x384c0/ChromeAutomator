@@ -1,7 +1,12 @@
 // utils
 let clicker = new Clicker(async clicker => {
-  await clicker.currentTab_click("div[class='vjs-play-control vjs-control ']");
-  await clicker.currentTab_wait("div[class='skip-button']", "^Пропустить рекламу$", 25000);
+  console.log("Started")
+  let iframeUrl = "^https://anime-365.ru/promo/embed"
+  // let rect = await clicker.currentTab_executeScript("document.querySelector(\"div[class='skip-button']\").getBoundingClientRect()",iframeUrl)
+  // console.log(rect)
+
+  // await clicker.currentTab_click("div[class='vjs-play-control vjs-control ']");
+  await clicker.currentTab_waitAndClick("div[class='skip-button']", "Пропустить рекламу(?! \\()", 25000, iframeUrl);
   console.log("Finished");
 })
 let requestListener = new RequestListener(
@@ -19,6 +24,7 @@ var request_logs_element = new Vue({ el: '#request_logs_element', data: { text: 
 
 //UI Actions
 function start() {
+  console.log("start")
   message_element.message += "Loading tab ...\n"
   chrome.tabs.query({ active: true, currentWindow: true }, tabCallback)
 }
@@ -28,5 +34,3 @@ function tabCallback(tabs) {
   message_element.text += "Tab id: " + tabs[0].id + "\n"
   clicker.start(tabs[0])
 }
-
-let tmp = "^Пропустить рекламу$"
