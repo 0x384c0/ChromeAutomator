@@ -8,14 +8,14 @@ class Clicker {
         });
     }
     executeScript(tabId, target, hrefRegex) {
-        console.log("executeScript target:" + target.code)
         return new Promise((resolve, reject) => {
             if (typeof hrefRegex !== "undefined") {
-                console.log("executeScript sendMessage hrefRegex:" + hrefRegex)
+                console.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
                 chrome.tabs.sendMessage(
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "executeScript", code: target.code, hrefRegex: hrefRegex },
                     (response) => {
+                        console.log("Clicker <<< executeScript response: " + response)
                         window.clearInterval(intervalID)
                         if (response instanceof Error)
                             reject(response)
@@ -114,14 +114,24 @@ class Clicker {
                 y: topLeftY + Math.round(height / 2)
             }
         }
+        return this.clickCoordinates(
+            target,
+            coordinates.x,
+            coordinates.y
+        );
+    }
+
+    async clickCoordinates(target, x, y) {
         var clickEvent = {
             type: 'mousePressed',
-            x: coordinates.x,
-            y: coordinates.y,
+            x: x,
+            y: y,
             button: 'left',
             clickCount: 1
         };
         await this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
+        clickEvent.type = 'mousePressed';
+        this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
         clickEvent.type = 'mouseReleased';
         return this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
     }
@@ -203,6 +213,9 @@ class Clicker {
     }
     currentTab_click(selector, hrefRegex) {
         return this.click(this.currentTabDebuggeeId, selector, hrefRegex)
+    }
+    currentTab_clickCoordinate(x, y) {
+        return this.clickCoordinates(this.currentTabDebuggeeId, x, y)
     }
     currentTab_exists(selector, regex, hrefRegex) {
         return this.exists(this.currentTabDebuggeeId, selector, regex, hrefRegex)

@@ -13,6 +13,10 @@
 <body>
     <div>Panel</div>
     <button id="start_button" class="start_button" v-on:click="click">Start bot</button>
+    <div id="coordinates">
+        <input v-model.number="x" type="number">
+        <input v-model.number="y" type="number">
+    </div>
     <div id="message_element" class="pre-formatted"> {{ text }} </div>
 
     <div id="regex_input">

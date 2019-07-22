@@ -30,6 +30,7 @@
             "all_frames": true
         }
     ],
+    "web_accessible_resources": ["library/modules/pageScript.js"],
     "permissions": [
         "debugger",
         "activeTab",

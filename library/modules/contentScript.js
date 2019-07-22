@@ -1,28 +1,55 @@
+class ContentScript {
 
-function init() {
-    console.log("Content Script: init onMessage window.location.href: " + window.location.href)
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        console.log("Content Script: onMessage request.action: " + request.action + " window.location.href: " + window.location.href)
-        switch (request.action) {
-            case "executeScript":
-                console.log("Content Script: executeScript new RegExp(\"" + request.hrefRegex + "\").test(\"" + window.location.href + "\")")
-                if (new RegExp(request.hrefRegex).test(window.location.href)) {
-                    console.log("Content Script: executeScript request.code: " + request.code)
-                    let result = null
-                    try {
-                        result = eval(request.code)
-                    } catch (error) {
-                        result = error
-                    }
-                    sendResponse(result)
-                }
-                break;
-            default:
-                sendResponse("Unknown command")
-                break;
-        }
+    injectScript(file) {
+        var th = (document.head || document.documentElement);
+        var s = document.createElement('script');
+        s.setAttribute('type', 'text/javascript');
+        s.setAttribute('src', chrome.extension.getURL(file));
+        th.appendChild(s);
+        s.parentNode.removeChild(s);
     }
-    )
+
+    evalCodeInPage(code, sendResponse) {
+        console.log("Content Script >>> executeScript code: " + code)
+        window.addEventListener('executeScriptResult',
+            function receiveResult(event) {
+                //Remove this listener, but you can keep it depend on your case
+                window.removeEventListener('executeScriptResult', receiveResult, false);
+                try {
+                    console.log("Content Script <<< executeScript event.detail.result: " + event.detail.result)
+                    sendResponse(event.detail.result)
+                } catch (e) {
+                    console.log("Content Script <<< executeScript e: " + e)
+                    sendResponse(e)
+                }
+
+            }, false);
+
+        let pageEvent = new CustomEvent('executeScript', { detail: { code: code } });
+        window.dispatchEvent(pageEvent);
+    }
+
+    constructor() {
+        this.injectScript('library/modules/pageScript.js');
+
+        //Listen for runtime message
+        // console.log("Content Script: init onMessage window.location.href: " + window.location.href)
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            switch (request.action) {
+                case "executeScript":
+                    if (new RegExp(request.hrefRegex).test(window.location.href)) {
+                        this.evalCodeInPage(request.code, sendResponse)
+                    }
+                    break;
+                default:
+                    sendResponse("Unknown command")
+                    break;
+            }
+        }
+        )
+
+    }
+
 }
 
-init()
+let contentScript = new ContentScript()
