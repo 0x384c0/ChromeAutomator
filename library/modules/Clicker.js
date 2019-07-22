@@ -188,22 +188,23 @@ class Clicker {
             .then(() => { return this.click(debuggeeId, selector, hrefRegex) })
     }
 
-    waitRequest(debuggeeId, regex, timout) {
+    waitRequest(regex, timout) {
         return new Promise((resolve, reject) => {
-            let filter = {
-                urls: [regex]
-            }
-            let onCompleted = (details) => {
-                if (details.tabId == debuggeeId.tabId) {
-                    window.clearInterval(intervalID)
-                    chrome.devtools.network.onRequestFinished.removeListener(this.onCompleted)
-                }
-            }
-            chrome.devtools.network.onRequestFinished.addListener(this.onCompleted, filter)
-            var intervalID = window.setInterval(() => {
-                chrome.devtools.network.onRequestFinished.removeListener(this.onCompleted)
-                reject(new Error("waitRequest timeout regex: " + regex))
+            let intervalID = window.setInterval(() => {
+                this.requestListener.stop()
+                reject(new Error("Clicker: waitRequest timeout regex: " + regex))
             }, timout)
+
+
+            console.log("Clicker >>> waitRequest regex: " + regex)
+            this.requestListener.start(regex, (url, body) => {
+                if (new RegExp(regex).test(url)) {
+                    console.log("Clicker <<< waitRequest url: " + url)
+                    window.clearInterval(intervalID)
+                    this.requestListener.stop()
+                    resolve(body)
+                }
+            });
         })
     }
 
@@ -226,12 +227,10 @@ class Clicker {
     currentTab_waitAndClick(selector, regex, timout, hrefRegex) {
         return this.waitAndClick(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
     }
-    currentTab_waitRequest(regex, timout) {
-        return this.waitRequest(this.currentTabDebuggeeId, regex, timout)
-    }
 
     //main
-    constructor(taskHandler) {
+    constructor(requestListener, taskHandler) {
+        this.requestListener = requestListener
         this.taskHandler = taskHandler
         chrome.debugger.onDetach.addListener(this.onDetach);
     }
