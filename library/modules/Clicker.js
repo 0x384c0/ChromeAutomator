@@ -86,7 +86,7 @@ class Clicker {
         return new Promise((resolve, reject) => { window.setTimeout(resolve, ms); });
     }
 
-    async clickSelector(target, selector, hrefRegex) {
+    async clickWithDebugger(target, selector, hrefRegex) {
         var coordinates = null
         if (typeof hrefRegex !== "undefined") {
             let rect = await this.executeScript(target.tabId, { code: "document.querySelector(\"" + selector + "\").getBoundingClientRect()" }, hrefRegex)
@@ -142,8 +142,14 @@ class Clicker {
     }
 
     //utils
-    click(debuggeeId, selector, hrefRegex) {
-        return this.clickSelector(debuggeeId, selector, hrefRegex)
+    async click(debuggeeId, selector, isTrusted, hrefRegex) {
+        if (isTrusted) {
+            await this.executeScript(debuggeeId.tabId, { code: "document.querySelector(\"" + selector + "\").scrollIntoViewIfNeeded()" }, hrefRegex)
+            await this.sleep(50)
+            return this.clickWithDebugger(debuggeeId, selector, hrefRegex)
+        } else {
+            return this.executeScript(debuggeeId.tabId, { code: "document.querySelector(\"" + selector + "\").dispatchEvent(new MouseEvent(\"click\"))" }, hrefRegex)
+        }
     }
 
     exists(debuggeeId, selector, regex, hrefRegex) {
@@ -181,11 +187,11 @@ class Clicker {
         })
     }
 
-    waitAndClick(debuggeeId, selector, regex, timout, hrefRegex) {
+    waitAndClick(debuggeeId, selector, isTrusted, regex, timout, hrefRegex) {
         return this.wait(debuggeeId, selector, regex, timout, hrefRegex)
             .catch(this.catchError)
             .then(() => { return this.sleep(500) })
-            .then(() => { return this.click(debuggeeId, selector, hrefRegex) })
+            .then(() => { return this.click(debuggeeId, selector, isTrusted, hrefRegex) })
     }
 
     waitRequest(regex, timout) {
@@ -220,8 +226,8 @@ class Clicker {
     currentTab_executeScript(code, hrefRegex) {
         return this.executeScript(this.currentTabDebuggeeId.tabId, { code: code }, hrefRegex)
     }
-    currentTab_click(selector, hrefRegex) {
-        return this.click(this.currentTabDebuggeeId, selector, hrefRegex)
+    currentTab_click(selector, isTrusted, hrefRegex) {
+        return this.click(this.currentTabDebuggeeId, selector, isTrusted, hrefRegex)
     }
     currentTab_clickCoordinate(x, y) {
         return this.clickCoordinates(this.currentTabDebuggeeId, x, y)
@@ -232,8 +238,8 @@ class Clicker {
     currentTab_wait(selector, regex, timout, hrefRegex) {
         return this.wait(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
     }
-    currentTab_waitAndClick(selector, regex, timout, hrefRegex) {
-        return this.waitAndClick(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
+    currentTab_waitAndClick(selector, isTrusted, regex, timout, hrefRegex) {
+        return this.waitAndClick(this.currentTabDebuggeeId, selector, isTrusted, regex, timout, hrefRegex)
     }
     currentTab_search(regex, hrefRegex) {
         return this.search(this.currentTabDebuggeeId, regex, hrefRegex)
