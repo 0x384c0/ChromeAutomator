@@ -208,6 +208,14 @@ class Clicker {
         })
     }
 
+    search(debuggeeId, regex, hrefRegex) {
+        return this.executeScript(debuggeeId.tabId, { code: "document.body.innerHTML.match(new RegExp(\"" + regex + "\"))" }, hrefRegex)
+    }
+
+    goBack(debuggeeId) {
+        return this.executeScript(debuggeeId.tabId, { code: "window.history.back()" })
+    }
+
     //active tab wrappers
     currentTab_executeScript(code, hrefRegex) {
         return this.executeScript(this.currentTabDebuggeeId.tabId, { code: code }, hrefRegex)
@@ -226,6 +234,12 @@ class Clicker {
     }
     currentTab_waitAndClick(selector, regex, timout, hrefRegex) {
         return this.waitAndClick(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
+    }
+    currentTab_search(regex, hrefRegex) {
+        return this.search(this.currentTabDebuggeeId, regex, hrefRegex)
+    }
+    currentTab_goBack() {
+        return this.goBack(this.currentTabDebuggeeId)
     }
 
     //main
