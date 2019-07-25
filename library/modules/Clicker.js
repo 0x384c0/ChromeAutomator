@@ -1,11 +1,40 @@
 class Clicker {
+
+    //debugger
+    attached = false
+    version = "1.2"
+
+    connectDebuggerIfNeeded(debuggeeId) {
+        return new Promise((resolve, reject) => {
+            if (this.attached) {
+                resolve()
+            } else {
+                chrome.debugger.attach(debuggeeId, this.version, () => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError)
+                    } else {
+                        this.attached = true
+                        resolve()
+                    }
+                });
+            }
+        })
+    }
+    onDetach(debuggeeId) {
+        this.attached = false
+    }
+
     // Promise wrappers for chrome APIs
     sendCommand(target, command, params) {
-        return new Promise((resolve, reject) => {
-            chrome.debugger.sendCommand(target, command, params, (response) => {
-                resolve(response);
+        return this.connectDebuggerIfNeeded(this.currentTabDebuggeeId)
+            .catch(this.catchError)
+            .then(() => {
+                return new Promise((resolve, reject) => {
+                    chrome.debugger.sendCommand(target, command, params, (response) => {
+                        resolve(response);
+                    });
+                })
             });
-        });
     }
     executeScript(tabId, target, hrefRegex) {
         return new Promise((resolve, reject) => {
@@ -38,33 +67,6 @@ class Clicker {
                 resolve(response);
             });
         });
-    }
-
-    //debugger
-
-    attached = false
-    version = "1.2"
-
-    connectDebuggerIfNeeded(tab) {
-        return new Promise((resolve, reject) => {
-            var tabId = tab.id;
-            var debuggeeId = { tabId: tabId };
-            if (this.attached) {
-                resolve(debuggeeId)
-            } else {
-                chrome.debugger.attach(debuggeeId, this.version, () => {
-                    if (chrome.runtime.lastError) {
-                        reject(chrome.runtime.lastError)
-                    } else {
-                        this.attached = true
-                        resolve(debuggeeId)
-                    }
-                });
-            }
-        })
-    }
-    onDetach(debuggeeId) {
-        this.attached = false
     }
 
 
@@ -256,14 +258,11 @@ class Clicker {
     }
 
     start(tab, taskHandler) {
-        return this.connectDebuggerIfNeeded(tab)
-            .catch(this.catchError)
-            .then(debuggeeId => { this.exeucteTask(debuggeeId, taskHandler) })
-            .catch(this.catchError)
+        this.currentTabDebuggeeId = { tabId: tab.id }
+        this.exeucteTask(taskHandler)
     }
 
-    async exeucteTask(debuggeeId, taskHandler) {
-        this.currentTabDebuggeeId = debuggeeId
+    async exeucteTask(taskHandler) {
         await taskHandler(this)
     }
 }
