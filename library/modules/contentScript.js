@@ -39,6 +39,8 @@ class ContentScript {
                 case "executeScript":
                     if (new RegExp(request.hrefRegex).test(window.location.href)) {
                         this.evalCodeInPage(request.code, sendResponse)
+                    } else {
+                        console.log("executeScript rejected location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
                     }
                     break;
                 default:

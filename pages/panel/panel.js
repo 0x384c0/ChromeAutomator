@@ -1,24 +1,74 @@
+//logs
+function info(text) {
+  console.log('%c ' + text + ' ', 'color: lightgreen');
+}
+
 // utils
 let requestListener = new RequestListener()
 let taskHandler = async clicker => {
-  console.log("Started")
-  // let iframeUrl = "^https://anime-365.ru/promo/embed"
-  // await clicker.currentTab_click("div[class='vjs-play-control vjs-control ']",false)
-  // await clicker.sleep(1000)
-  // await clicker.currentTab_wait("div[class='skip-button']", "Пропустить рекламу(?! \\()", 25000, iframeUrl)
-  // await clicker.currentTab_executeScript("this.doSkip()", iframeUrl)
-  // let body = await clicker.waitRequest("/translations/embedActivation", 25000)
-  // console.log(JSON.parse(JSON.parse(body).sources)[0].urls[0])
+  console.log("%c Started")
+  let catalogUrl = "^https://smotret-anime-365.ru/catalog/"
+  let promoEmbedUrl = "^https://anime-365.ru/promo/embed"
+  let videoEmbedUrl = "^https://smotret-anime-365.ru/translations/embed"
+  let nexEpSel = "i[class='material-icons right']"
+  let playSel = "div[class='vjs-play-control vjs-control ']"
+  var hasNextEpisode = false
 
-  await clicker.currentTab_click("div > div.m-select-sibling-episode > a", true)
+
+  do {
+    let hasPromo = await clicker.currentTab_exists(playSel, null, videoEmbedUrl)
+    let hasLongPromo = await clicker.currentTab_exists("iframe", null, videoEmbedUrl)
+    if (hasLongPromo) {
+      info("%c Has Long Promo. Skipping it")
+      let offset = await clicker.currentTab_calculateOffset([
+        { hrefRegex: catalogUrl, selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }/*,
+        { hrefRegex: videoEmbedUrl, selector: "iframe[src^='https://anime-365.ru/promo/embed']" }*/
+      ])
+      await clicker.currentTab_click(playSel, true, videoEmbedUrl, offset) //TODO: fix misclick when need scroll
+      await clicker.sleep(1000)
+      await clicker.currentTab_wait("div[class='skip-button']", "Пропустить рекламу(?! \\()", 25000, promoEmbedUrl)
+      await clicker.currentTab_executeScript("this.doSkip()", promoEmbedUrl)
+    } else if (hasPromo) {
+      info("%c Has Short Promo. Skipping it")
+      let offset = await clicker.currentTab_calculateOffset([
+        { hrefRegex: catalogUrl, selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }
+      ])
+      await clicker.currentTab_click(playSel, true, videoEmbedUrl, offset) //TODO: fix misclick when need scroll
+    } else {
+      info("%c Has No Promo.")
+    }
+
+    //get url
+    let body = await clicker.waitRequest("/translations/embedActivation", 25000)
+    info(JSON.parse(JSON.parse(body).sources)[0].urls[0])
+
+    //play video to avoid ad
+    let offset = await clicker.currentTab_calculateOffset([
+      { hrefRegex: "^https://smotret-anime-365.ru/catalog/", selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }
+    ])
+    await clicker.currentTab_waitAndClick("div.skip-button", true, "Пропустить рекламу(?! \\()", 25000, videoEmbedUrl, offset)
+
+    //go to next episode
+    hasNextEpisode = await clicker.currentTab_exists(nexEpSel, null, catalogUrl)
+    if (hasNextEpisode) {
+      info("Going to next episode")
+      await clicker.currentTab_click(nexEpSel, true, catalogUrl)
+      await clicker.sleep(1000) //TODO: use wait page loaded 
+    }
+  } while (hasNextEpisode);
+
+
+
+  // await clicker.currentTab_click("div[class='skip-button']", false, promoEmbedUrl)
+  // await clicker.currentTab_click("div > div.m-select-sibling-episode > a", true)
 
   // var urlRegex = "(https?:\/\/[^\s]+)";
   // let urls = await clicker.currentTab_search(urlRegex)
-  // console.log(urls)
+  // info(urls)
 
   // await clicker.currentTab_goBack()
 
-  console.log("Finished");
+  info("Finished");
 }
 let clicker = new Clicker(requestListener)
 
@@ -31,13 +81,13 @@ var click_coordinates = new Vue({ el: '#click_coordinates', methods: { click: cl
 
 //UI Actions
 function start() {
-  console.log("start")
+  info("start")
   message_element.message += "Loading tab ...\n"
   chrome.tabs.query({ active: true, currentWindow: true }, tabCallback)
 }
 
 function clickCoordinates() {
-  console.log("clickCoordinates")
+  info("clickCoordinates")
   message_element.message += "Loading tab ...\n"
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     clicker.start(tabs[0], async (clicker) => {

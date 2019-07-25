@@ -38,22 +38,26 @@ class Clicker {
     }
     executeScript(tabId, target, hrefRegex) {
         return new Promise((resolve, reject) => {
-            if (typeof hrefRegex !== "undefined") {
+            if (hrefRegex != null) {
                 console.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
+                var intervalID = window.setInterval(() => {
+                    reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
+                }, 1000);
                 chrome.tabs.sendMessage(
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "executeScript", code: target.code, hrefRegex: hrefRegex },
                     (response) => {
                         console.log("Clicker <<< executeScript response: " + response)
                         window.clearInterval(intervalID)
-                        if (response instanceof Error)
-                            reject(response)
-                        else
-                            resolve(response)
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError)
+                        } else {
+                            if (response instanceof Error)
+                                reject(response)
+                            else
+                                resolve(response)
+                        }
                     });
-                var intervalID = window.setInterval(() => {
-                    reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
-                }, 500);
             } else {
                 chrome.tabs.executeScript(tabId, target, (response) => {
                     resolve(response);
@@ -64,7 +68,12 @@ class Clicker {
     sendMessage(tabId, message) {
         return new Promise((resolve, reject) => {
             chrome.tabs.sendMessage(tabId, message, (response) => {
-                resolve(response);
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError)
+                } else {
+                    this.attached = true
+                    resolve(response)
+                }
             });
         });
     }
@@ -88,24 +97,23 @@ class Clicker {
         return new Promise((resolve, reject) => { window.setTimeout(resolve, ms); });
     }
 
-    async clickWithDebugger(target, selector, hrefRegex) {
+    async clickWithDebugger(debuggeeId, selector, hrefRegex, offset) {
         var coordinates = null
-        if (typeof hrefRegex !== "undefined") {
-            let rect = await this.executeScript(target.tabId, { code: "document.querySelector(\"" + selector + "\").getBoundingClientRect()" }, hrefRegex)
+        if (hrefRegex != null) {
+            let rect = await this.getRect(debuggeeId, selector, hrefRegex)
             coordinates = {
                 x: rect.left + Math.round(rect.width / 2),
                 y: rect.top + Math.round(rect.height / 2)
             }
             console.log(rect)
-            console.log(coordinates)
         } else {
-            const rootNode = await this.sendCommand(target, 'DOM.getDocument');
+            const rootNode = await this.sendCommand(debuggeeId, 'DOM.getDocument');
             var rootNodeId = rootNode.root.nodeId;
-            const node = await this.sendCommand(target, 'DOM.querySelector', {
+            const node = await this.sendCommand(debuggeeId, 'DOM.querySelector', {
                 nodeId: rootNodeId,
                 selector: selector
             });
-            const { model: model } = await this.sendCommand(target, 'DOM.getBoxModel', node);
+            const { model: model } = await this.sendCommand(debuggeeId, 'DOM.getBoxModel', node);
             var border = model.border;
             var topLeftX = border[0];
             var topLeftY = border[1];
@@ -115,15 +123,30 @@ class Clicker {
                 x: topLeftX + Math.round(width / 2),
                 y: topLeftY + Math.round(height / 2)
             }
+            console.log(JSON.stringify(model))
+        }
+        if (offset != null) {
+            coordinates.x += offset.x
+            coordinates.y += offset.y
+            console.log("offset x: " + offset.x + " y: " + offset.y)
         }
         return this.clickCoordinates(
-            target,
+            debuggeeId,
             coordinates.x,
             coordinates.y
         );
     }
 
-    async clickCoordinates(target, x, y) {
+    async getRect(debuggeeId, selector, hrefRegex) {
+        const rect = await this.executeScript(debuggeeId.tabId, { code: "document.querySelector(\"" + selector + "\").getBoundingClientRect()" }, hrefRegex)
+        await this.sleep(100)
+        if (isNaN(rect.x) || isNaN(rect.y))
+            throw new Error("Illegal rect: " + rect + " selector: " + selector + " hrefRegex: " + hrefRegex)
+        else
+            return rect
+    }
+
+    async clickCoordinates(debuggeeId, x, y) {
         console.log("clickCoordinates x: " + x + " y: " + y)
         var clickEvent = {
             type: 'mousePressed',
@@ -132,40 +155,53 @@ class Clicker {
             button: 'left',
             clickCount: 1
         };
-        await this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
+        await this.sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
         clickEvent.type = 'mousePressed';
-        this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
+        this.sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
         clickEvent.type = 'mouseReleased';
-        return this.sendCommand(target, 'Input.dispatchMouseEvent', clickEvent);
+        return this.sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
     }
 
     catchError(e) {
-        console.log(e)
-        alert(e.message)
+        throw e
     }
 
     //utils
-    async click(debuggeeId, selector, isTrusted, hrefRegex) {
+    async click(debuggeeId, selector, isTrusted, hrefRegex, offset) {
         if (isTrusted) {
             await this.executeScript(debuggeeId.tabId, { code: "document.querySelector(\"" + selector + "\").scrollIntoViewIfNeeded()" }, hrefRegex)
-            await this.sleep(50)
-            return this.clickWithDebugger(debuggeeId, selector, hrefRegex)
+            await this.sleep(500)
+            return this.clickWithDebugger(debuggeeId, selector, hrefRegex, offset)
         } else {
             return this.executeScript(debuggeeId.tabId, { code: "document.querySelector(\"" + selector + "\").dispatchEvent(new MouseEvent(\"click\"))" }, hrefRegex)
         }
     }
 
-    exists(debuggeeId, selector, regex, hrefRegex) {
+    async exists(debuggeeId, selector, regex, hrefRegex) {
         let code = "document.querySelector(\"" + selector + "\").innerText"
-        return this.executeScript(debuggeeId.tabId, { code: code }, hrefRegex)
-            .then((innerText) => {
-                let array = innerText.toString().match(regex)
-                let result = array != undefined && array != null && array.length != 0
-                if (!result) {
-                    console.log("found element for selector: " + selector + " regex: " + regex + " but innerText was: " + innerText)
-                }
-                return result
-            })
+        var innerText = null
+        try {
+            innerText = await this.executeScript(debuggeeId.tabId, { code: code }, hrefRegex);
+        } catch (e) {
+            if (e.message == "The message port closed before a response was received.") {
+                return false
+            } else {
+                throw e
+            }
+        }
+        if (innerText == null || !(typeof innerText === 'string' || innerText instanceof String)) {
+            console.log("not found element for selector: " + selector)
+            return false // not found or error
+        } else if (regex == null) {
+            return true; // no checks need, return
+        } else {
+            let array = innerText.toString().match(regex);
+            let result = array != undefined && array != null && array.length != 0;
+            if (!result) {
+                console.log("found element for selector: " + selector + " regex: " + regex + " but innerText was: " + innerText);
+            }
+            return result;
+        }
     }
 
     wait(debuggeeId, selector, regex, timout, hrefRegex) {
@@ -190,11 +226,11 @@ class Clicker {
         })
     }
 
-    waitAndClick(debuggeeId, selector, isTrusted, regex, timout, hrefRegex) {
+    waitAndClick(debuggeeId, selector, isTrusted, regex, timout, hrefRegex, offset) {
         return this.wait(debuggeeId, selector, regex, timout, hrefRegex)
             .catch(this.catchError)
             .then(() => { return this.sleep(500) })
-            .then(() => { return this.click(debuggeeId, selector, isTrusted, hrefRegex) })
+            .then(() => { return this.click(debuggeeId, selector, isTrusted, hrefRegex, offset) })
     }
 
     waitRequest(regex, timout) {
@@ -225,12 +261,26 @@ class Clicker {
         return this.executeScript(debuggeeId.tabId, { code: "window.history.back()" })
     }
 
+    async calculateOffset(debuggeeId, selectorsInfo) {
+        const result = { x: 0, y: 0 }
+        for (const selectorInfo of selectorsInfo) {
+            const hrefRegex = selectorInfo.hrefRegex
+            const selector = selectorInfo.selector
+            const rect = await this.getRect(debuggeeId, selector, hrefRegex)
+            result.x += rect.left
+            result.y += rect.top
+        }
+        return result
+    }
+
+    //TODO: use objects as  parameters
+    //TODO: add wait until page load
     //active tab wrappers
     currentTab_executeScript(code, hrefRegex) {
         return this.executeScript(this.currentTabDebuggeeId.tabId, { code: code }, hrefRegex)
     }
-    currentTab_click(selector, isTrusted, hrefRegex) {
-        return this.click(this.currentTabDebuggeeId, selector, isTrusted, hrefRegex)
+    currentTab_click(selector, isTrusted, hrefRegex, offset) {
+        return this.click(this.currentTabDebuggeeId, selector, isTrusted, hrefRegex, offset)
     }
     currentTab_clickCoordinate(x, y) {
         return this.clickCoordinates(this.currentTabDebuggeeId, x, y)
@@ -241,14 +291,17 @@ class Clicker {
     currentTab_wait(selector, regex, timout, hrefRegex) {
         return this.wait(this.currentTabDebuggeeId, selector, regex, timout, hrefRegex)
     }
-    currentTab_waitAndClick(selector, isTrusted, regex, timout, hrefRegex) {
-        return this.waitAndClick(this.currentTabDebuggeeId, selector, isTrusted, regex, timout, hrefRegex)
+    currentTab_waitAndClick(selector, isTrusted, regex, timout, hrefRegex, offset) {
+        return this.waitAndClick(this.currentTabDebuggeeId, selector, isTrusted, regex, timout, hrefRegex, offset)
     }
     currentTab_search(regex, hrefRegex) {
         return this.search(this.currentTabDebuggeeId, regex, hrefRegex)
     }
     currentTab_goBack() {
         return this.goBack(this.currentTabDebuggeeId)
+    }
+    currentTab_calculateOffset(selectorsInfo) {
+        return this.calculateOffset(this.currentTabDebuggeeId, selectorsInfo)
     }
 
     //main
@@ -263,6 +316,10 @@ class Clicker {
     }
 
     async exeucteTask(taskHandler) {
-        await taskHandler(this)
+        try {
+            await taskHandler(this)
+        } catch (e) {
+            this.catchError(e)
+        }
     }
 }
