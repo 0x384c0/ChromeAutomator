@@ -13,11 +13,13 @@
 <body>
     <div>Panel</div>
     <button id="start_button" class="start_button" v-on:click="click">Start bot</button>
+    <div id="message_element" class="pre-formatted"> {{ text }} </div>
+    <br>
     <div id="coordinates">
         <input v-model.number="x" type="number">
         <input v-model.number="y" type="number">
     </div>
-    <div id="message_element" class="pre-formatted"> {{ text }} </div>
+    <button id="click_coordinates" class="start_button" v-on:click="click">Click coordinates</button>
 
     <script type="text/javascript" charset="utf-8" src="panel.js"></script>
 </body>

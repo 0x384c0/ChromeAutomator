@@ -1,6 +1,6 @@
 // utils
 let requestListener = new RequestListener()
-let clicker = new Clicker(requestListener, async clicker => {
+let taskHandler = async clicker => {
   console.log("Started")
   // let iframeUrl = "^https://anime-365.ru/promo/embed"
   // await clicker.currentTab_click("div[class='vjs-play-control vjs-control ']",false)
@@ -19,13 +19,15 @@ let clicker = new Clicker(requestListener, async clicker => {
   // await clicker.currentTab_goBack()
 
   console.log("Finished");
-})
+}
+let clicker = new Clicker(requestListener)
 
 //UI Binding
 var message_element = new Vue({ el: '#message_element', data: { text: 'null\n' } })
 var start_button = new Vue({ el: '#start_button', methods: { click: start } })
 
 var coordinates = new Vue({ el: "#coordinates", data: { x: 0, y: 0 } })
+var click_coordinates = new Vue({ el: '#click_coordinates', methods: { click: clickCoordinates } })
 
 //UI Actions
 function start() {
@@ -34,8 +36,18 @@ function start() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabCallback)
 }
 
+function clickCoordinates() {
+  console.log("clickCoordinates")
+  message_element.message += "Loading tab ...\n"
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    clicker.start(tabs[0], async (clicker) => {
+      await clicker.currentTab_clickCoordinate(coordinates.x, coordinates.y)
+    })
+  })
+}
+
 //Callbacks
 function tabCallback(tabs) {
   message_element.text += "Tab id: " + tabs[0].id + "\n"
-  clicker.start(tabs[0])
+  clicker.start(tabs[0], taskHandler)
 }

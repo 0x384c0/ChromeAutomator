@@ -45,7 +45,7 @@ class Clicker {
     attached = false
     version = "1.2"
 
-    connectDebugger(tab) {
+    connectDebuggerIfNeeded(tab) {
         return new Promise((resolve, reject) => {
             var tabId = tab.id;
             var debuggeeId = { tabId: tabId };
@@ -122,6 +122,7 @@ class Clicker {
     }
 
     async clickCoordinates(target, x, y) {
+        console.log("clickCoordinates x: " + x + " y: " + y)
         var clickEvent = {
             type: 'mousePressed',
             x: x,
@@ -249,21 +250,20 @@ class Clicker {
     }
 
     //main
-    constructor(requestListener, taskHandler) {
+    constructor(requestListener) {
         this.requestListener = requestListener
-        this.taskHandler = taskHandler
         chrome.debugger.onDetach.addListener(this.onDetach);
     }
 
-    start(tab) {
-        return this.connectDebugger(tab)
+    start(tab, taskHandler) {
+        return this.connectDebuggerIfNeeded(tab)
             .catch(this.catchError)
-            .then(debuggeeId => { this.exeucteTask(debuggeeId) })
+            .then(debuggeeId => { this.exeucteTask(debuggeeId, taskHandler) })
             .catch(this.catchError)
     }
 
-    async exeucteTask(debuggeeId) {
+    async exeucteTask(debuggeeId, taskHandler) {
         this.currentTabDebuggeeId = debuggeeId
-        await this.taskHandler(this)
+        await taskHandler(this)
     }
 }
