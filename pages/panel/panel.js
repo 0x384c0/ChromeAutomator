@@ -16,6 +16,7 @@ let taskHandler = async clicker => {
 
 
   do {
+    var isNeedWaitRequest = true
     let hasPromo = await clicker.currentTab_exists(playSel, null, videoEmbedUrl)
     let hasLongPromo = await clicker.currentTab_exists("iframe", null, videoEmbedUrl)
     if (hasLongPromo) {
@@ -36,17 +37,32 @@ let taskHandler = async clicker => {
       await clicker.currentTab_click(playSel, true, videoEmbedUrl, offset) //TODO: fix misclick when need scroll
     } else {
       info("%c Has No Promo.")
+      isNeedWaitRequest = false
     }
 
-    //get url
-    let body = await clicker.waitRequest("/translations/embedActivation", 25000)
-    info(JSON.parse(JSON.parse(body).sources)[0].urls[0])
-
-    //play video to avoid ad
+    if (isNeedWaitRequest) {
+      //wait url
+      let body = await clicker.waitRequest("/translations/embedActivation", 25000)
+      clicker.sleep(500)
+    }
+    //play video
     let offset = await clicker.currentTab_calculateOffset([
       { hrefRegex: "^https://smotret-anime-365.ru/catalog/", selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }
     ])
     await clicker.currentTab_waitAndClick("div.skip-button", true, "Пропустить рекламу(?! \\()", 25000, videoEmbedUrl, offset)
+    await clicker.sleep(500)
+
+    //grab data
+    let dataTitle = await clicker.currentTab_executeScript('document.querySelector("video").getAttribute("data-title")', videoEmbedUrl)
+    let dataSrc = await clicker.currentTab_executeScript('document.querySelector("video").getAttribute("src")', videoEmbedUrl)
+    let dataSubtitles = await clicker.currentTab_executeScript('document.querySelector("video").getAttribute("data-subtitles")', videoEmbedUrl)
+    console.log("------")
+    info("Got data:")
+    info("title: " + dataTitle)
+    info("video: " + dataSrc)
+    info("subtitles: " + dataSubtitles)
+    console.log("------")
+
 
     //go to next episode
     hasNextEpisode = await clicker.currentTab_exists(nexEpSel, null, catalogUrl)
