@@ -27,17 +27,13 @@ let taskHandler = async clicker => {
       isNeedWaitRequest = false
     } else if (hasLongPromo) {
       info("%c Has Long Promo. Skipping it")
-      await clicker.scrollIntoViewIfNeeded({ selector: playSel, hrefRegex: videoEmbedUrl })
-      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }] })
-      await clicker.click({ selector: playSel, isTrusted: true, hrefRegex: videoEmbedUrl, offset: offset })
+      await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }],hrefRegex: videoEmbedUrl })
       await clicker.sleep(1000)
       await clicker.wait({ selector: skipSel, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, hrefRegex: promoEmbedUrl })
       await clicker.executeScript({ code: "this.doSkip()", hrefRegex: promoEmbedUrl })
     } else if (hasPromo) {
       info("%c Has Short Promo. Skipping it")
-      await clicker.scrollIntoViewIfNeeded({ selector: playSel, hrefRegex: videoEmbedUrl })
-      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }] })
-      await clicker.click({ selector: playSel, isTrusted: true, hrefRegex: videoEmbedUrl, offset: offset })
+      await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }],hrefRegex: videoEmbedUrl })
     } else {//TODO: add case when only youtube frame
       throw "Invalid state"
     }
@@ -50,14 +46,10 @@ let taskHandler = async clicker => {
     //play video
     if (hasNoPromo) {
       info("Playing video with play button")
-      await clicker.scrollIntoViewIfNeeded({ selector: playSel, hrefRegex: videoEmbedUrl })
-      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }] })
-      await clicker.click({ selector: playSel, isTrusted: true, hrefRegex: videoEmbedUrl, offset: offset })
+      await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else if (hasLongPromo || hasPromo) {
       info("Playing video with skip button")
-      await clicker.scrollIntoViewIfNeeded({ selector: skipSel, hrefRegex: videoEmbedUrl })
-      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: "^https://smotret-anime-365.ru/catalog/", selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }] })
-      await clicker.waitAndClick({ selector: skipSel, isTrusted: true, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, hrefRegex: videoEmbedUrl, offset: offset })
+      await clicker.click({ selector: skipSel, isTrusted: true, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else {
       throw "Invalid state"
     }

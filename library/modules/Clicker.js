@@ -302,11 +302,23 @@ class Clicker {
     clickCoordinate(params) {
         return this._clickCoordinates(this.currentTabDebuggeeId, params.x, params.y)
     }
-    click(params) {
-        return this._click(this.currentTabDebuggeeId, params.selector, params.isTrusted, params.hrefRegex, params.offset)
-    }
-    waitAndClick(params) {
-        return this._waitAndClick(this.currentTabDebuggeeId, params.selector, params.isTrusted, params.innerTextRegex, params.waitTimout, params.hrefRegex, params.offset)
+    async click(params) {
+        if (params.iframesSelectorInfo != null && params.offset != null)
+            throw "iframesSelectorInfo and offset conflicting. params: " + params
+
+        if ((params.innerTextRegex != null && params.waitTimout == null) || (params.innerTextRegex == null && params.waitTimout != null))
+            throw "innerTextRegex and waitTimout must be set. params: " + params
+
+        if (params.iframesSelectorInfo != null && params.offset == null) {
+            await this._scrollIntoViewIfNeeded(this.currentTabDebuggeeId, params.selector, params.hrefRegex)
+            params.offset = await this._calculateOffset(this.currentTabDebuggeeId, params.iframesSelectorInfo)
+        }
+
+        if (params.innerTextRegex != null && params.waitTimout != null) {
+            await this._waitAndClick(this.currentTabDebuggeeId, params.selector, params.isTrusted, params.innerTextRegex, params.waitTimout, params.hrefRegex, params.offset)
+        } else {
+            await this._click(this.currentTabDebuggeeId, params.selector, params.isTrusted, params.hrefRegex, params.offset)
+        }
     }
     goBack(params) {
         return this._goBack(this.currentTabDebuggeeId)
