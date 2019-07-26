@@ -6,83 +6,83 @@ function info(text) {
 // utils
 let requestListener = new RequestListener()
 let taskHandler = async clicker => {
-  console.log("%c Started")
+  info("%c Started")
   let catalogUrl = "^https://smotret-anime-365.ru/catalog/"
   let promoEmbedUrl = "^https://anime-365.ru/promo/embed"
   let videoEmbedUrl = "^https://smotret-anime-365.ru/translations/embed"
+  let videoEmbedSel = "iframe[src^='https://smotret-anime-365.ru/translations/embed']"
   let nexEpSel = "i[class='material-icons right']"
   let playSel = "div[class='vjs-play-control vjs-control ']"
+  let skipSel = "div.skip-button"
   var hasNextEpisode = false
 
 
   do {
     var isNeedWaitRequest = true
-    let hasPromo = await clicker.currentTab_exists(playSel, null, videoEmbedUrl)
-    let hasLongPromo = await clicker.currentTab_exists("iframe", null, videoEmbedUrl)
-    if (hasLongPromo) {
-      info("%c Has Long Promo. Skipping it")
-      let offset = await clicker.currentTab_calculateOffset([
-        { hrefRegex: catalogUrl, selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }/*,
-        { hrefRegex: videoEmbedUrl, selector: "iframe[src^='https://anime-365.ru/promo/embed']" }*/
-      ])
-      await clicker.currentTab_click(playSel, true, videoEmbedUrl, offset) //TODO: fix misclick when need scroll
-      await clicker.sleep(1000)
-      await clicker.currentTab_wait("div[class='skip-button']", "Пропустить рекламу(?! \\()", 25000, promoEmbedUrl)
-      await clicker.currentTab_executeScript("this.doSkip()", promoEmbedUrl)
-    } else if (hasPromo) {
-      info("%c Has Short Promo. Skipping it")
-      let offset = await clicker.currentTab_calculateOffset([
-        { hrefRegex: catalogUrl, selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }
-      ])
-      await clicker.currentTab_click(playSel, true, videoEmbedUrl, offset) //TODO: fix misclick when need scroll
-    } else {
+    let hasPromo = await clicker.exists({ selector: playSel, innerTextRegex: null, hrefRegex: videoEmbedUrl })
+    let hasLongPromo = await clicker.exists({ selector: "iframe", innerTextRegex: null, hrefRegex: videoEmbedUrl })
+    let hasNoPromo = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src") != null', hrefRegex: videoEmbedUrl })
+    if (hasNoPromo) {
       info("%c Has No Promo.")
       isNeedWaitRequest = false
+    } else if (hasLongPromo) {
+      info("%c Has Long Promo. Skipping it")
+      await clicker.scrollIntoViewIfNeeded({ selector: playSel, hrefRegex: videoEmbedUrl })
+      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }] })
+      await clicker.click({ selector: playSel, isTrusted: true, hrefRegex: videoEmbedUrl, offset: offset })
+      await clicker.sleep(1000)
+      await clicker.wait({ selector: skipSel, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, hrefRegex: promoEmbedUrl })
+      await clicker.executeScript({ code: "this.doSkip()", hrefRegex: promoEmbedUrl })
+    } else if (hasPromo) {
+      info("%c Has Short Promo. Skipping it")
+      await clicker.scrollIntoViewIfNeeded({ selector: playSel, hrefRegex: videoEmbedUrl })
+      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }] })
+      await clicker.click({ selector: playSel, isTrusted: true, hrefRegex: videoEmbedUrl, offset: offset })
+    } else {//TODO: add case when only youtube frame
+      throw "Invalid state"
     }
 
     if (isNeedWaitRequest) {
       //wait url
-      let body = await clicker.waitRequest("/translations/embedActivation", 25000)
+      let body = await clicker.waitRequest({ urlRegex: "/translations/embedActivation", waitTimout: 25000 })
       clicker.sleep(500)
     }
     //play video
-    let offset = await clicker.currentTab_calculateOffset([
-      { hrefRegex: "^https://smotret-anime-365.ru/catalog/", selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }
-    ])
-    await clicker.currentTab_waitAndClick("div.skip-button", true, "Пропустить рекламу(?! \\()", 25000, videoEmbedUrl, offset)
+    if (hasNoPromo) {
+      info("Playing video with play button")
+      await clicker.scrollIntoViewIfNeeded({ selector: playSel, hrefRegex: videoEmbedUrl })
+      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }] })
+      await clicker.click({ selector: playSel, isTrusted: true, hrefRegex: videoEmbedUrl, offset: offset })
+    } else if (hasLongPromo || hasPromo) {
+      info("Playing video with skip button")
+      await clicker.scrollIntoViewIfNeeded({ selector: skipSel, hrefRegex: videoEmbedUrl })
+      let offset = await clicker.calculateOffset({ selectorsInfo: [{ hrefRegex: "^https://smotret-anime-365.ru/catalog/", selector: "iframe[src^='https://smotret-anime-365.ru/translations/embed']" }] })
+      await clicker.waitAndClick({ selector: skipSel, isTrusted: true, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, hrefRegex: videoEmbedUrl, offset: offset })
+    } else {
+      throw "Invalid state"
+    }
     await clicker.sleep(500)
 
     //grab data
-    let dataTitle = await clicker.currentTab_executeScript('document.querySelector("video").getAttribute("data-title")', videoEmbedUrl)
-    let dataSrc = await clicker.currentTab_executeScript('document.querySelector("video").getAttribute("src")', videoEmbedUrl)
-    let dataSubtitles = await clicker.currentTab_executeScript('document.querySelector("video").getAttribute("data-subtitles")', videoEmbedUrl)
-    console.log("------")
+    let dataTitle = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-title")', hrefRegex: videoEmbedUrl })
+    let dataSrc = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src")', hrefRegex: videoEmbedUrl })
+    let dataSubtitles = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-subtitles")', hrefRegex: videoEmbedUrl })
+    info("------")
     info("Got data:")
     info("title: " + dataTitle)
     info("video: " + dataSrc)
     info("subtitles: " + dataSubtitles)
-    console.log("------")
+    info("------")
 
 
     //go to next episode
-    hasNextEpisode = await clicker.currentTab_exists(nexEpSel, null, catalogUrl)
+    hasNextEpisode = await clicker.exists({ selector: nexEpSel, innerTextRegex: null, hrefRegex: catalogUrl })
     if (hasNextEpisode) {
       info("Going to next episode")
-      await clicker.currentTab_click(nexEpSel, true, catalogUrl)
-      await clicker.sleep(1000) //TODO: use wait page loaded 
+      await clicker.click({ selector: nexEpSel, isTrusted: true, hrefRegex: catalogUrl })
+      await clicker.sleep(5000) //TODO: use wait page loaded 
     }
   } while (hasNextEpisode);
-
-
-
-  // await clicker.currentTab_click("div[class='skip-button']", false, promoEmbedUrl)
-  // await clicker.currentTab_click("div > div.m-select-sibling-episode > a", true)
-
-  // var urlRegex = "(https?:\/\/[^\s]+)";
-  // let urls = await clicker.currentTab_search(urlRegex)
-  // info(urls)
-
-  // await clicker.currentTab_goBack()
 
   info("Finished");
 }
@@ -98,22 +98,14 @@ var click_coordinates = new Vue({ el: '#click_coordinates', methods: { click: cl
 //UI Actions
 function start() {
   info("start")
-  message_element.message += "Loading tab ...\n"
-  chrome.tabs.query({ active: true, currentWindow: true }, tabCallback)
+  clicker.start(chrome.devtools.inspectedWindow.tabId, taskHandler)
 }
 
 function clickCoordinates() {
-  info("clickCoordinates")
-  message_element.message += "Loading tab ...\n"
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    clicker.start(tabs[0], async (clicker) => {
-      await clicker.currentTab_clickCoordinate(coordinates.x, coordinates.y)
-    })
-  })
-}
 
-//Callbacks
-function tabCallback(tabs) {
-  message_element.text += "Tab id: " + tabs[0].id + "\n"
-  clicker.start(tabs[0], taskHandler)
+  let clickTaskHandler = async (clicker) => {
+    await clicker.clickCoordinate({ x: coordinates.x, y: coordinates.y })
+  }
+  info("clickCoordinates")
+  clicker.start(chrome.devtools.inspectedWindow.tabId, clickTaskHandler)
 }

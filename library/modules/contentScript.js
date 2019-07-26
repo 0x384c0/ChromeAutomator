@@ -1,3 +1,7 @@
+function console_log(obj) {
+    console.log(obj)
+}
+
 class ContentScript {
 
     injectScript(file) {
@@ -10,16 +14,16 @@ class ContentScript {
     }
 
     evalCodeInPage(code, sendResponse) {
-        console.log("Content Script >>> executeScript code: " + code)
+        console_log("Content Script >>> executeScript code: " + code)
         window.addEventListener('executeScriptResult',
             function receiveResult(event) {
                 //Remove this listener, but you can keep it depend on your case
                 window.removeEventListener('executeScriptResult', receiveResult, false);
                 try {
-                    console.log("Content Script <<< executeScript event.detail.result: " + event.detail.result)
+                    console_log("Content Script <<< executeScript event.detail.result: " + event.detail.result)
                     sendResponse(event.detail.result)
                 } catch (e) {
-                    console.log("Content Script <<< executeScript e: " + e)
+                    console_log("Content Script <<< executeScript e: " + e)
                     sendResponse(e)
                 }
 
@@ -33,14 +37,14 @@ class ContentScript {
         this.injectScript('library/modules/pageScript.js');
 
         //Listen for runtime message
-        // console.log("Content Script: init onMessage window.location.href: " + window.location.href)
+        // console_log("Content Script: init onMessage window.location.href: " + window.location.href)
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             switch (request.action) {
                 case "executeScript":
                     if (new RegExp(request.hrefRegex).test(window.location.href)) {
                         this.evalCodeInPage(request.code, sendResponse)
                     } else {
-                        console.log("executeScript rejected location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
+                        console_log("executeScript rejected location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
                     }
                     break;
                 default:
