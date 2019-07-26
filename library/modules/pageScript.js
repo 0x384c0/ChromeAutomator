@@ -1,5 +1,5 @@
 function console_log(obj) {
-    console.log(obj)
+    // console.log(obj)
 }
 
 function init() {

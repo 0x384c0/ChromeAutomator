@@ -1,12 +1,10 @@
 //logs
-function info(text) {
-  console.log('%c ' + text + ' ', 'color: lightgreen');
-}
+let logger = new Logger()
 
 // utils
 let requestListener = new RequestListener()
 let taskHandler = async clicker => {
-  info("%c Started")
+  logger.info("%c Started")
   let catalogUrl = "^https://smotret-anime-365.ru/catalog/"
   let promoEmbedUrl = "^https://anime-365.ru/promo/embed"
   let videoEmbedUrl = "^https://smotret-anime-365.ru/translations/embed"
@@ -23,16 +21,16 @@ let taskHandler = async clicker => {
     let hasLongPromo = await clicker.exists({ selector: "iframe", innerTextRegex: null, hrefRegex: videoEmbedUrl })
     let hasNoPromo = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src") != null', hrefRegex: videoEmbedUrl })
     if (hasNoPromo) {
-      info("%c Has No Promo.")
+      logger.info("%c Has No Promo.")
       isNeedWaitRequest = false
     } else if (hasLongPromo) {
-      info("%c Has Long Promo. Skipping it")
+      logger.info("%c Has Long Promo. Skipping it")
       await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }],hrefRegex: videoEmbedUrl })
       await clicker.sleep(1000)
       await clicker.wait({ selector: skipSel, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, hrefRegex: promoEmbedUrl })
       await clicker.executeScript({ code: "this.doSkip()", hrefRegex: promoEmbedUrl })
     } else if (hasPromo) {
-      info("%c Has Short Promo. Skipping it")
+      logger.info("%c Has Short Promo. Skipping it")
       await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }],hrefRegex: videoEmbedUrl })
     } else {//TODO: add case when only youtube frame
       throw "Invalid state"
@@ -45,10 +43,10 @@ let taskHandler = async clicker => {
     }
     //play video
     if (hasNoPromo) {
-      info("Playing video with play button")
+      logger.info("Playing video with play button")
       await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else if (hasLongPromo || hasPromo) {
-      info("Playing video with skip button")
+      logger.info("Playing video with skip button")
       await clicker.click({ selector: skipSel, isTrusted: true, innerTextRegex: "Пропустить рекламу(?! \\()", waitTimout: 25000, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else {
       throw "Invalid state"
@@ -59,24 +57,24 @@ let taskHandler = async clicker => {
     let dataTitle = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-title")', hrefRegex: videoEmbedUrl })
     let dataSrc = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src")', hrefRegex: videoEmbedUrl })
     let dataSubtitles = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-subtitles")', hrefRegex: videoEmbedUrl })
-    info("------")
-    info("Got data:")
-    info("title: " + dataTitle)
-    info("video: " + dataSrc)
-    info("subtitles: " + dataSubtitles)
-    info("------")
+    logger.info("------")
+    logger.info("Got data:")
+    logger.info("title: " + dataTitle)
+    logger.info("video: " + dataSrc)
+    logger.info("subtitles: " + dataSubtitles)
+    logger.info("------")
 
 
     //go to next episode
     hasNextEpisode = await clicker.exists({ selector: nexEpSel, innerTextRegex: null, hrefRegex: catalogUrl })
     if (hasNextEpisode) {
-      info("Going to next episode")
+      logger.info("Going to next episode")
       await clicker.click({ selector: nexEpSel, isTrusted: true, hrefRegex: catalogUrl })
       await clicker.sleep(5000) //TODO: use wait page loaded 
     }
   } while (hasNextEpisode);
 
-  info("Finished");
+  logger.info("Finished");
 }
 let clicker = new Clicker(requestListener)
 
@@ -89,7 +87,7 @@ var click_coordinates = new Vue({ el: '#click_coordinates', methods: { click: cl
 
 //UI Actions
 function start() {
-  info("start")
+  logger.info("start")
   clicker.start(chrome.devtools.inspectedWindow.tabId, taskHandler)
 }
 
@@ -98,6 +96,6 @@ function clickCoordinates() {
   let clickTaskHandler = async (clicker) => {
     await clicker.clickCoordinate({ x: coordinates.x, y: coordinates.y })
   }
-  info("clickCoordinates")
+  logger.info("clickCoordinates")
   clicker.start(chrome.devtools.inspectedWindow.tabId, clickTaskHandler)
 }

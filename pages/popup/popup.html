@@ -4,10 +4,25 @@
 <head>
     <title>Popup</title>
     <link rel="stylesheet" type="text/css" href="popup.css">
+    <script type="text/javascript" charset="utf-8" src="../../library/external/vue/vue.js"></script>
+    <link rel="stylesheet" href="../../library/external/vue-material/dist/vue-material.css">
+    <link rel="stylesheet" href="../../library/external/vue-material/dist/theme/default.css">
+    <script type="text/javascript" charset="utf-8" src="../../library/external/vue-material/dist/vue-material.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../../library/modules/Storage.js"></script>
 </head>
 
 <body>
-    <div>TODO: edit. <br> You will need to play the game with the devtools "KanColle" panel opened.  Activate the devtools panel with F12 or Ctrl+Shift+J. With the devtools open, find and select the "Kancolle" tab from the top menu of the devtools. You may need to press the ">>" in order to find it. Remember to NOT let the game start until this panel has been activated. </div>
+    <div class="text_view">
+        <div>TODO: Edit</div>
+        <div> You will need to play the game with the devtools "KanColle" panel opened. Activate the devtools panel with F12 or Ctrl+Shift+J. With the devtools open, find and select the "Kancolle" tab from the top menu of the devtools. You may need to press
+            the ">>" in order to find it. Remember to NOT let the game start until this panel has been activated. </div>
+
+    </div>
+    <div id="settings">
+        <md-switch v-model="isVerboseLogging" v-on:change="change">
+            Verbose Logging
+        </md-switch>
+    </div>
     <script src="popup.js"></script>
 </body>
 

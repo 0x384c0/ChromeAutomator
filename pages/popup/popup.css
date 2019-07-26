@@ -1,3 +1,7 @@
-.start_button{
+body {
     padding: 10px;
+}
+
+.text_view {
+    width: 500px;
 }

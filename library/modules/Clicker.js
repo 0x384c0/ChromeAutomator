@@ -1,20 +1,21 @@
-function console_log(obj) {
-    console.log(obj)
-}
+
 
 class Clicker {
+    logger = new Logger()
 
     //run task
     async _exeucteTask(taskHandler) {
         try {
             await taskHandler(this)
         } catch (e) {
+            this._disconnectDebuggerIfNeeded(this.currentTabDebuggeeId)
             this._catchError(e)
         }
     }
 
     //utils
     _catchError(e) {
+        console.log(e.message)
         throw e
     }
     //debugger
@@ -37,6 +38,22 @@ class Clicker {
             }
         })
     }
+    _disconnectDebuggerIfNeeded(debuggeeId) {
+        return new Promise((resolve, reject) => {
+            if (this._attached) {
+                chrome.debugger.detach(debuggeeId, () => {
+                    if (chrome.runtime.lastError) {
+                        console.log(chrome.runtime.lastError)
+                    } else {
+                        this._attached = false
+                        resolve()
+                    }
+                });
+            } else {
+                resolve()
+            }
+        })
+    }
     _onDetach(debuggeeId) {
         this._attached = false
     }
@@ -56,7 +73,7 @@ class Clicker {
     _executeScript(tabId, target, hrefRegex) {
         return new Promise((resolve, reject) => {
             if (hrefRegex != null) {
-                console_log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
+                this.logger.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
                 var intervalID = window.setInterval(() => {
                     reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
                 }, 1000);
@@ -64,7 +81,7 @@ class Clicker {
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "executeScript", code: target.code, hrefRegex: hrefRegex },
                     (response) => {
-                        console_log("Clicker <<< executeScript response: " + response)
+                        this.logger.log("Clicker <<< executeScript response: " + response)
                         window.clearInterval(intervalID)
                         if (chrome.runtime.lastError) {
                             reject(chrome.runtime.lastError)
@@ -123,7 +140,7 @@ class Clicker {
                 x: rect.left + Math.round(rect.width / 2),
                 y: rect.top + Math.round(rect.height / 2)
             }
-            console_log(rect)
+            this.logger.log(rect)
         } else {
             const rootNode = await this._sendCommand(debuggeeId, 'DOM.getDocument');
             var rootNodeId = rootNode.root.nodeId;
@@ -141,12 +158,12 @@ class Clicker {
                 x: topLeftX + Math.round(width / 2),
                 y: topLeftY + Math.round(height / 2)
             }
-            console_log(JSON.stringify(model))
+            this.logger.log(JSON.stringify(model))
         }
         if (offset != null) {
             coordinates.x += offset.x
             coordinates.y += offset.y
-            console_log("offset x: " + offset.x + " y: " + offset.y)
+            this.logger.log("offset x: " + offset.x + " y: " + offset.y)
         }
         return this._clickCoordinates(
             debuggeeId,
@@ -156,9 +173,9 @@ class Clicker {
     }
 
     async _clickCoordinates(debuggeeId, x, y) {
-        console_log("clickCoordinates x: " + x + " y: " + y)
+        this.logger.log("clickCoordinates x: " + x + " y: " + y)
         var clickEvent = {
-            type: 'mousePressed',
+            type: 'mouseMoved',
             x: x,
             y: y,
             button: 'left',
@@ -166,7 +183,7 @@ class Clicker {
         };
         await this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
         clickEvent.type = 'mousePressed';
-        this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
+        await this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
         clickEvent.type = 'mouseReleased';
         return this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
     }
@@ -223,7 +240,7 @@ class Clicker {
             }
         }
         if (innerText == null || !(typeof innerText === 'string' || innerText instanceof String)) {
-            console_log("not found element for selector: " + selector)
+            this.logger.log("not found element for selector: " + selector)
             return false // not found or error
         } else if (innerTextRegex == null) {
             return true; // no checks need, return
@@ -231,7 +248,7 @@ class Clicker {
             let array = innerText.toString().match(innerTextRegex);
             let result = array != undefined && array != null && array.length != 0;
             if (!result) {
-                console_log("found element for selector: " + selector + " innerTextRegex: " + innerTextRegex + " but innerText was: " + innerText);
+                this.logger.log("found element for selector: " + selector + " innerTextRegex: " + innerTextRegex + " but innerText was: " + innerText);
             }
             return result;
         }
@@ -281,10 +298,10 @@ class Clicker {
             }, waitTimout)
 
 
-            console_log("Clicker >>> waitRequest urlRegex: " + urlRegex)
+            this.logger.log("Clicker >>> waitRequest urlRegex: " + urlRegex)
             this.requestListener.start(urlRegex, (url, body) => {
                 if (new RegExp(urlRegex).test(url)) {
-                    console_log("Clicker <<< waitRequest url: " + url)
+                    this.logger.log("Clicker <<< waitRequest url: " + url)
                     window.clearInterval(intervalID)
                     this.requestListener.stop()
                     resolve(body)
@@ -353,8 +370,10 @@ class Clicker {
         chrome.debugger.onDetach.addListener(this._onDetach);
     }
 
-    start(tabId, taskHandler) {
+    async start(tabId, taskHandler) {
+        this.logger.reset()
         this.currentTabDebuggeeId = { tabId: tabId }
-        this._exeucteTask(taskHandler)
+        await this._exeucteTask(taskHandler)
+        await this._disconnectDebuggerIfNeeded(this.currentTabDebuggeeId)
     }
 }
