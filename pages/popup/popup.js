@@ -10,7 +10,6 @@ var settings = null
 async function init() {
     const isVerbose = await storage.getIsVerboseLogging()
     console.log("isVerbose: " + isVerbose)
-    console.log("isVerbose.isVerboseLogging: " + isVerbose.isVerboseLogging)
     settings = new Vue({
         el: '#settings',
         data: { isVerboseLogging: isVerbose },

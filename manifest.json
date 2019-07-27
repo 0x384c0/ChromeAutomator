@@ -31,7 +31,8 @@
         }
     ],
     "web_accessible_resources": [
-        "library/modules/pageScript.js"
+        "library/modules/pageScript.js",
+        "library/external/monaco-editor/*"
     ],
     "permissions": [
         "debugger",

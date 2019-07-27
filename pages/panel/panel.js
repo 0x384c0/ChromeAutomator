@@ -85,6 +85,7 @@ var start_button = new Vue({ el: '#start_button', methods: { click: start } })
 var coordinates = new Vue({ el: "#coordinates", data: { x: 0, y: 0 } })
 var click_coordinates = new Vue({ el: '#click_coordinates', methods: { click: clickCoordinates } })
 
+
 //UI Actions
 function start() {
   logger.info("start")
@@ -98,4 +99,27 @@ function clickCoordinates() {
   }
   logger.info("clickCoordinates")
   clicker.start(chrome.devtools.inspectedWindow.tabId, clickTaskHandler)
+}
+
+//function editor
+let editor = null
+initEditor()
+async function  initEditor(){
+  window.MonacoEnvironment = {
+    getWorkerUrl: function(workerId, label) {
+      return 'monaco-editor-worker-loader-proxy.js';
+    }
+  };
+  
+  require.config({ paths: { 'vs': '../../library/external/monaco-editor/min/vs' }});
+
+  editor = monaco.editor.create(document.getElementById('container'), {
+    value: [
+      'function x() {',
+      '\tconsole.log("Hello world!");',
+      '}'
+    ].join('\n'),
+    language: 'javascript',
+    theme: 'vs-dark'
+  });
 }
