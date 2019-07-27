@@ -17,9 +17,10 @@ let taskHandler = async clicker => {
 
   do {
     var isNeedWaitRequest = true
-    let hasPromo = await clicker.exists({ selector: playSel, innerTextRegex: null, hrefRegex: videoEmbedUrl })
-    let hasLongPromo = await clicker.exists({ selector: "iframe", innerTextRegex: null, hrefRegex: videoEmbedUrl })
+    await clicker.sleep(5000) //TODO: use wait page loaded 
     let hasNoPromo = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src") != null', hrefRegex: videoEmbedUrl })
+    let hasLongPromo = await clicker.exists({ selector: "iframe", innerTextRegex: null, hrefRegex: videoEmbedUrl })
+    let hasPromo = await clicker.exists({ selector: playSel, innerTextRegex: null, hrefRegex: videoEmbedUrl })
     if (hasNoPromo) {
       logger.info("%c Has No Promo.")
       isNeedWaitRequest = false
@@ -39,7 +40,7 @@ let taskHandler = async clicker => {
     if (isNeedWaitRequest) {
       //wait url
       let body = await clicker.waitRequest({ urlRegex: "/translations/embedActivation", waitTimout: 25000 })
-      clicker.sleep(500)
+      await clicker.sleep(500)
     }
     //play video
     if (hasNoPromo) {
@@ -70,7 +71,6 @@ let taskHandler = async clicker => {
     if (hasNextEpisode) {
       logger.info("Going to next episode")
       await clicker.click({ selector: nexEpSel, isTrusted: true, hrefRegex: catalogUrl })
-      await clicker.sleep(5000) //TODO: use wait page loaded 
     }
   } while (hasNextEpisode);
 
