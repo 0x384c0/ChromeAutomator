@@ -2,18 +2,51 @@
     height: 100%;
     margin: 0;
 }
-.vertical{
-    display:flex;
+
+.vertical {
+    display: flex;
     flex-direction: column;
 }
-.grow{
-    flex-grow: 1;
-    overflow:hidden;
+
+.horisontal {
+    display: flex;
 }
+
+.code_bar {
+    height: 55px;
+}
+
+.grow {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
 .md-field {
     max-width: 200px;
 }
-.state_label{
+
+.state_label {
     margin-left: 10px;
     margin-right: 10px;
+}
+
+/* workarounds */
+
+.pre-formatted {
+    white-space: pre;
+}
+
+.md-tabs-content, .md-tabs-container, .md-tab, .md-tabs {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.md-tab-nav-button {
+    height: 35px !important;
+}
+
+#toolbar {
+    height: 50px !important;
+    min-height: 50px !important;
 }

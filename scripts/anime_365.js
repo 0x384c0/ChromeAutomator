@@ -1,4 +1,4 @@
-logger.info("%c Started")
+log("Started")
 let catalogUrl = "^https://smotret-anime-365.ru/catalog/"
 let promoEmbedUrl = "^https://anime-365.ru/promo/embed"
 let videoEmbedUrl = "^https://smotret-anime-365.ru/translations/embed"
@@ -17,16 +17,16 @@ do {
     let hasLongPromo = await clicker.exists({ selector: "iframe", innerTextRegex: null, hrefRegex: videoEmbedUrl })
     let hasPromo = await clicker.exists({ selector: playSel, innerTextRegex: null, hrefRegex: videoEmbedUrl })
     if (hasNoPromo) {
-        logger.info("%c Has No Promo.")
+        log("Has No Promo.")
         isNeedWaitRequest = false
     } else if (hasLongPromo) {
-        logger.info("%c Has Long Promo. Skipping it")
+        log("Has Long Promo. Skipping it")
         await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
         await clicker.sleep(1000)
         await clicker.wait({ selector: skipSel, innerTextRegex: skipAdSel, waitTimout: 25000, hrefRegex: promoEmbedUrl })
         await clicker.executeScript({ code: "this.doSkip()", hrefRegex: promoEmbedUrl })
     } else if (hasPromo) {
-        logger.info("%c Has Short Promo. Skipping it")
+        log("Has Short Promo. Skipping it")
         await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else {//TODO: add case when only youtube frame
         throw "Invalid state"
@@ -39,10 +39,10 @@ do {
     }
     //play video
     if (hasNoPromo) {
-        logger.info("Playing video with play button")
+        log("Playing video with play button")
         await clicker.click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else if (hasLongPromo || hasPromo) {
-        logger.info("Playing video with skip button")
+        log("Playing video with skip button")
         await clicker.click({ selector: skipSel, isTrusted: true, innerTextRegex: skipAdSel, waitTimout: 25000, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else {
         throw "Invalid state"
@@ -53,20 +53,18 @@ do {
     let dataTitle = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-title")', hrefRegex: videoEmbedUrl })
     let dataSrc = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src")', hrefRegex: videoEmbedUrl })
     let dataSubtitles = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-subtitles")', hrefRegex: videoEmbedUrl })
-    logger.info("------")
-    logger.info("Got data:")
-    logger.info("title: " + dataTitle)
-    logger.info("video: " + dataSrc)
-    logger.info("subtitles: " + dataSubtitles)
-    logger.info("------")
+
+    output(dataTitle)
+    output(dataSrc)
+    output(dataSubtitles)
 
 
     //go to next episode
     hasNextEpisode = await clicker.exists({ selector: nexEpSel, innerTextRegex: null, hrefRegex: catalogUrl })
     if (hasNextEpisode) {
-        logger.info("Going to next episode")
+        log("Going to next episode")
         await clicker.click({ selector: nexEpSel, isTrusted: true, hrefRegex: catalogUrl })
     }
 } while (hasNextEpisode);
 
-logger.info("Finished");
+log("Finished");

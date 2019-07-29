@@ -3,6 +3,13 @@ const defaultScript = "anime_365.js"
 
 //logs
 const logger = new Logger()
+function log(obj) {
+    logger.info(obj)
+    app.logs += obj.toString() + "\n"
+}
+function output(text) {
+    app.output += text + "\n"
+}
 
 // utils
 const requestListener = new RequestListener()
@@ -14,7 +21,9 @@ const app = new Vue({
     el: '#app',
     data: {
         script: defaultScript,
-        is_working: false
+        is_working: false,
+        output: "",
+        logs: "",
     },
     methods: {
         start: start,
@@ -26,7 +35,7 @@ let editor = null
 
 //UI Actions
 function start() {
-    logger.info("start")
+    log("start")
     showStart()
     const code = editor.getValue()
     try {
@@ -68,9 +77,8 @@ async function initEditor() {
     loadScript(chrome.extension.getURL("/scripts/" + app.script))
 }
 function loadScript(url) {
-    logger.info("Loading script url: " + url)
+    log("Loading script url: " + url)
     fetch(url)
         .then(response => response.text())
         .then(text => editor.setValue(text))
-        .then(() => logger.info("Loaded script url: " + url))
 }
