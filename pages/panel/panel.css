@@ -1,15 +1,19 @@
-.start_button{
-    padding: 10px;
+.root, html, body {
+    height: 100%;
+    margin: 0;
 }
-.pre-formatted {
-    white-space: pre;
+.vertical{
+    display:flex;
+    flex-direction: column;
 }
-#container {
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 800px;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
+.grow{
+    flex-grow: 1;
+    overflow:hidden;
+}
+.md-field {
+    max-width: 200px;
+}
+.state_label{
+    margin-left: 10px;
+    margin-right: 10px;
 }

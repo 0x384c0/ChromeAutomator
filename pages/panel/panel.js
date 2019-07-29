@@ -1,24 +1,36 @@
+//constants
+const defaultScript = "anime_365.js"
+
 //logs
-let logger = new Logger()
+const logger = new Logger()
 
 // utils
-let requestListener = new RequestListener()
-let clicker = new Clicker(requestListener)
+const requestListener = new RequestListener()
+const clicker = new Clicker(requestListener)
 
 //UI Binding
-var message_element = new Vue({ el: '#message_element', data: { text: 'null\n' } })
-var start_button = new Vue({ el: '#start_button', methods: { click: start } })
-
-var coordinates = new Vue({ el: "#coordinates", data: { x: 0, y: 0 } })
-var click_coordinates = new Vue({ el: '#click_coordinates', methods: { click: clickCoordinates } })
+Vue.use(VueMaterial.default)
+const app = new Vue({
+    el: '#app',
+    data: {
+        script: defaultScript,
+        is_working: false
+    },
+    methods: {
+        start: start,
+        reload: () => { location.reload() }
+    }
+})
+let editor = null
 
 
 //UI Actions
 function start() {
     logger.info("start")
+    showStart()
     const code = editor.getValue()
     try {
-        eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" + code + "})")
+        eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" + code + ";hideStart()})")
     } catch (e) {
         const err = e.constructor('Error: ' + e.message + "\nlineNumber: " + e.lineNumber)
         // +3 because `err` has the line number of the `eval` line plus two.
@@ -27,25 +39,33 @@ function start() {
     }
 }
 
-function clickCoordinates() {
-    let clickTaskHandler = async (clicker) => {
-        await clicker.clickCoordinate({ x: coordinates.x, y: coordinates.y })
-    }
-    logger.info("clickCoordinates")
-    clicker.start(chrome.devtools.inspectedWindow.tabId, clickTaskHandler)
+//others
+function showStart() {
+    app.is_working = true
+}
+function hideStart() {
+    app.is_working = false
 }
 
 //function editor
-let editor = null
 initEditor()
 async function initEditor() {
     require.config({ paths: { 'vs': '../../library/external/monaco-editor/min/vs' } });
-
+    monaco.editor.defineTheme('vs-dark-transparent', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [],
+        colors: {
+            "editor.background": '#00000000',
+            'editor.lineHighlightBackground': '#FFFFFF20',
+        }
+    })
     editor = monaco.editor.create(document.getElementById('container'), {
         language: 'javascript',
-        theme: 'vs-dark'
+        theme: 'vs-dark-transparent',
+        automaticLayout: true
     })
-    loadScript(chrome.extension.getURL("/scripts/anime_365.js"))
+    loadScript(chrome.extension.getURL("/scripts/" + app.script))
 }
 function loadScript(url) {
     logger.info("Loading script url: " + url)
