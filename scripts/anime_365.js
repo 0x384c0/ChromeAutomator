@@ -1,4 +1,6 @@
 log("Started")
+setFileName("download.sh")
+
 let catalogUrl = "^https://smotret-anime-365.ru/catalog/"
 let promoEmbedUrl = "^https://anime-365.ru/promo/embed"
 let videoEmbedUrl = "^https://smotret-anime-365.ru/translations/embed"

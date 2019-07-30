@@ -10,24 +10,24 @@ function log(obj) {
 function output(text) {
     app.output += text + "\n"
 }
-function wget(fileUrl,fileName){
+function wget(fileUrl, fileName) {
     let fileNameParam = ""
-    if (fileName != null){
-        fileNameParam = "-O \"" + fileName + "\""
+    if (fileName != null) {
+        fileNameParam = "-O \"" + fileName.replace(/[^A-zА-я0-9_-\s\.:]/g,'') + "\""
     }
     output("wget " + fileNameParam + " -c --retry-connrefused --tries=3 --timeout=5 \"" + fileUrl + "\"")
 }
-function ffmpeg(videoUrl,subtitlesUrl){
+function ffmpeg(videoUrl, subtitlesUrl) {
     let subtitlesParam = ""
-    if (subtitlesUrl != null){
+    if (subtitlesUrl != null) {
         subtitlesParam = "-vf subtitles=filename=\"" + subtitlesUrl + "\""
     }
-    output("ffplay " + subtitlesParam + "  -user-agent \"Mozilla/5.0\" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \"" + videoUrl +"\"")
+    output("ffplay " + subtitlesParam + "  -user-agent \"Mozilla/5.0\" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \"" + videoUrl + "\"")
 }
 
 // utils
 const requestListener = new RequestListener()
-const clicker = new Clicker(requestListener)
+const clicker = new Clicker(requestListener,onError)
 
 //UI Binding
 Vue.use(VueMaterial.default)
@@ -38,11 +38,13 @@ const app = new Vue({
         is_working: false,
         output: "",
         logs: "",
+        save_filename: "text.txt"
     },
     methods: {
         start: start,
         reload: () => { location.reload() },
-        copy:copy
+        copy: copy,
+        save: save
     }
 })
 let editor = null
@@ -63,9 +65,14 @@ function start() {
     }
 }
 
-function copy(){
+function copy() {
     window.getSelection().selectAllChildren(document.getElementById("output"));
     document.execCommand("copy");
+}
+
+function save() {
+    var file = new File([app.output], app.save_filename, { type: "text/plain;charset=utf-8" });
+    saveAs(file);
 }
 
 //others
@@ -74,6 +81,13 @@ function showStart() {
 }
 function hideStart() {
     app.is_working = false
+}
+function setFileName(filename){
+    app.save_filename = filename
+}
+function onError(e){
+    showStart()
+    log(e.message)
 }
 
 //function editor

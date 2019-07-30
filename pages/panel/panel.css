@@ -10,6 +10,7 @@
 
 .horisontal {
     display: flex;
+    flex-flow: unset !important;
 }
 
 .code_bar {
@@ -30,22 +31,23 @@
     margin-right: 10px;
 }
 
-.output_frame{
+.output_frame {
     height: 100px;
     position: relative;
 }
 
-.output{
+.output {
     height: 100%;
     width: 100%;
     position: absolute;
     overflow-y: scroll;
 }
 
-.right_top{
-    position: absolute;
+.right_top {
+    width: unset !important;
     float: right;
 }
+
 /* workarounds */
 
 .pre-formatted {
@@ -65,4 +67,8 @@
 #toolbar {
     height: 50px !important;
     min-height: 50px !important;
+}
+
+#copy_button {
+    width: 200px;
 }

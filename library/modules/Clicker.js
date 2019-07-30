@@ -16,6 +16,7 @@ class Clicker {
     //utils
     _catchError(e) {
         console.log(e.message)
+        this.onError(e)
         throw e
     }
     //debugger
@@ -365,8 +366,9 @@ class Clicker {
     }
 
     //main
-    constructor(requestListener) {
+    constructor(requestListener,onError) {
         this.requestListener = requestListener
+        this.onError = onError
         chrome.debugger.onDetach.addListener(this._onDetach);
     }
 

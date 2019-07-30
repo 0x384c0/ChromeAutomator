@@ -26,6 +26,7 @@
     <script type="text/javascript" charset="utf-8" src="../../library/modules/Logger.js"></script>
     <script type="text/javascript" charset="utf-8" src="../../library/modules/Clicker.js"></script>
     <script type="text/javascript" charset="utf-8" src="../../library/modules/RequestListener.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../../library/external/file-saver/FileSaver.js"></script>
 </head>
 
 <body>
@@ -40,7 +41,7 @@
                                 <md-option value="anime_365.js">anime_365.js</md-option>
                             </md-select>
                         </md-field>
-                        <md-button v-if="!is_working" v-on:click="start" class="md-raised md-primary">
+                        <md-button v-if="!is_working" v-on:click="start" class="md-raised md-accent">
                             <md-icon id="menu_icon">play_arrow</md-icon>
                         </md-button>
                         <div v-if="is_working" class="md-title state_label">Working...</div>
@@ -50,8 +51,15 @@
                     </md-toolbar>
                     <div id="container" class="grow"></div>
                     <div class="output_frame">
-                        <div  id="output" class="pre-formatted output">{{ output }}</div>
-                        <md-button class="right_top" v-on:click="copy">Copy</md-button>
+                        <div id="output" class="pre-formatted output">{{ output }}</div>
+                        <md-toolbar class="right_top horisontal">
+                            <md-field>
+                                <label>File name</label>
+                                <md-input v-model="save_filename"></md-input>
+                            </md-field>
+                            <md-button v-on:click="save" class="md-raised md-accent">Save</md-button>
+                            <md-button v-on:click="copy" id="copy_button">Copy to clipboard</md-button>
+                        </md-toolbar>
                     </div>
                 </div>
             </md-tab>
