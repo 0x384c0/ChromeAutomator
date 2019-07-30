@@ -1,7 +1,7 @@
 //constants
 const defaultScript = "anime_365.js"
 
-//logs
+//logs and outputs
 const logger = new Logger()
 function log(obj) {
     logger.info(obj)
@@ -9,6 +9,20 @@ function log(obj) {
 }
 function output(text) {
     app.output += text + "\n"
+}
+function wget(fileUrl,fileName){
+    let fileNameParam = ""
+    if (fileName != null){
+        fileNameParam = "-O \"" + fileName + "\""
+    }
+    output("wget " + fileNameParam + " -c --retry-connrefused --tries=3 --timeout=5 \"" + fileUrl + "\"")
+}
+function ffmpeg(videoUrl,subtitlesUrl){
+    let subtitlesParam = ""
+    if (subtitlesUrl != null){
+        subtitlesParam = "-vf subtitles=filename=\"" + subtitlesUrl + "\""
+    }
+    output("ffplay " + subtitlesParam + "  -user-agent \"Mozilla/5.0\" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \"" + videoUrl +"\"")
 }
 
 // utils
@@ -27,7 +41,8 @@ const app = new Vue({
     },
     methods: {
         start: start,
-        reload: () => { location.reload() }
+        reload: () => { location.reload() },
+        copy:copy
     }
 })
 let editor = null
@@ -48,6 +63,11 @@ function start() {
     }
 }
 
+function copy(){
+    window.getSelection().selectAllChildren(document.getElementById("output"));
+    document.execCommand("copy");
+}
+
 //others
 function showStart() {
     app.is_working = true
@@ -60,18 +80,9 @@ function hideStart() {
 initEditor()
 async function initEditor() {
     require.config({ paths: { 'vs': '../../library/external/monaco-editor/min/vs' } });
-    monaco.editor.defineTheme('vs-dark-transparent', {
-        base: 'vs-dark',
-        inherit: true,
-        rules: [],
-        colors: {
-            "editor.background": '#00000000',
-            'editor.lineHighlightBackground': '#FFFFFF20',
-        }
-    })
     editor = monaco.editor.create(document.getElementById('container'), {
         language: 'javascript',
-        theme: 'vs-dark-transparent',
+        theme: 'vs-dark',
         automaticLayout: true
     })
     loadScript(chrome.extension.getURL("/scripts/" + app.script))

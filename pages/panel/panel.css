@@ -30,6 +30,22 @@
     margin-right: 10px;
 }
 
+.output_frame{
+    height: 100px;
+    position: relative;
+}
+
+.output{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    overflow-y: scroll;
+}
+
+.right_top{
+    position: absolute;
+    float: right;
+}
 /* workarounds */
 
 .pre-formatted {

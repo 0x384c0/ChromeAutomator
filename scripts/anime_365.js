@@ -54,9 +54,8 @@ do {
     let dataSrc = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("src")', hrefRegex: videoEmbedUrl })
     let dataSubtitles = await clicker.executeScript({ code: 'document.querySelector("video").getAttribute("data-subtitles")', hrefRegex: videoEmbedUrl })
 
-    output(dataTitle)
-    output(dataSrc)
-    output(dataSubtitles)
+    wget(dataSrc, dataTitle + ".mp4")
+    wget(dataSubtitles, dataTitle + ".ass")
 
 
     //go to next episode

@@ -31,11 +31,8 @@
 <body>
     <div id="app" class="root">
 
-        <md-tabs md-alignment="centered md-primary">
+        <md-tabs md-alignment="centered" class="md-primary">
             <md-tab id="tab-code" md-label="code" class="root">
-
-
-
                 <div class="root vertical">
                     <md-toolbar id="toolbar">
                         <md-field>
@@ -49,15 +46,14 @@
                         <div v-if="is_working" class="md-title state_label">Working...</div>
                         <md-button v-on:click="reload">
                             Reload frame
+                        </md-button>
                     </md-toolbar>
                     <div id="container" class="grow"></div>
+                    <div class="output_frame">
+                        <div  id="output" class="pre-formatted output">{{ output }}</div>
+                        <md-button class="right_top" v-on:click="copy">Copy</md-button>
+                    </div>
                 </div>
-
-
-
-            </md-tab>
-            <md-tab id="tab-output" md-label="output">
-                <div class="pre-formatted">{{ output }}</div>
             </md-tab>
             <md-tab id="tab-logs" md-label="logs">
                 <div class="pre-formatted">{{ logs }}</div>
