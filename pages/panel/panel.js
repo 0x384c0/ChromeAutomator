@@ -1,5 +1,8 @@
 //constants
-const defaultScript = "anime_365.js"
+const scriptsInfo = [
+    { text: "smotret-anime-365.ru", value: "anime_365.js" },
+    { text: "ts.kg", value: "ts_kg.js" }
+]
 
 // utils
 const requestListener = new RequestListener()
@@ -10,9 +13,10 @@ Vue.use(VueMaterial.default)
 const app = new Vue({
     el: '#app',
     data: {
-        script: defaultScript,
+        selectedScript: "",
+        selectScriptOptions: scriptsInfo,
         is_working: false,
-        is_stopping:false,
+        is_stopping: false,
         output: "",
         logs: "",
         save_filename: "text.txt"
@@ -22,7 +26,10 @@ const app = new Vue({
         stop: stop,
         reload: () => { location.reload() },
         copy: copy,
-        save: save
+        save: save,
+        didSelectedScript: (data) => {
+            loadScript(chrome.extension.getURL("/scripts/" + data))
+        }
     }
 })
 let editor = null
@@ -48,7 +55,7 @@ function start() {
         throw err;
     }
 }
-function stop(){
+function stop() {
     log("Stopping")
     isNeedStop = true
     app.is_stopping = true
@@ -95,7 +102,7 @@ function atExecuteScriptLine(lineIndex, isError) {
     ]);
     editor.revealLineInCenter(lineIndex);
     lastLine = lineIndex
-    if (isNeedStop){
+    if (isNeedStop) {
         isNeedStop = false
         throw Error("Stopped by user")
     }
@@ -134,11 +141,24 @@ async function initEditor() {
         theme: 'vs-dark',
         automaticLayout: true
     })
-    loadScript(chrome.extension.getURL("/scripts/" + app.script))
+
+    chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab) => {
+        const scriptsMap = {}
+        for (scriptInfo of scriptsInfo) {
+            scriptsMap[scriptInfo.text] = scriptInfo.value
+        }
+        const pageUrl = tab.url
+        const key = Object.keys(scriptsMap).find(url => pageUrl.includes(url))
+        if (key != null) {
+            app.selectedScript = scriptsMap[key]
+        }
+    })
 }
 function loadScript(url) {
-    log("Loading script url: " + url)
-    fetch(url)
-        .then(response => response.text())
-        .then(text => editor.setValue(text))
+    if (url != null && url != "") {
+        log("Loading script url: " + url)
+        fetch(url)
+            .then(response => response.text())
+            .then(text => editor.setValue(text))
+    }
 }

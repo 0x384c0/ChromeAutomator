@@ -95,7 +95,7 @@ class Clicker {
                     });
             } else {
                 chrome.tabs.executeScript(tabId, target, (response) => {
-                    resolve(response);
+                    resolve(response[0]);
                 });
             }
         });

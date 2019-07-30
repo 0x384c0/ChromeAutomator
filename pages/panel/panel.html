@@ -37,8 +37,10 @@
                 <div class="root vertical">
                     <md-toolbar id="toolbar">
                         <md-field>
-                            <md-select v-model="script" name="script">
-                                <md-option value="anime_365.js">anime_365.js</md-option>
+                            <!-- md-selected="scriptFileChanged" -->
+                            <md-select v-model="selectedScript" @md-selected="didSelectedScript" name="script">
+                                <md-option v-for="selectScriptOption in selectScriptOptions"
+                                    v-bind:value="selectScriptOption.value">{{ selectScriptOption.text }}</md-option>
                             </md-select>
                         </md-field>
                         <md-button v-if="!is_working && !is_stopping" v-on:click="start" class="md-raised md-accent">
