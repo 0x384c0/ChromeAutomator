@@ -13,7 +13,7 @@ function output(text) {
 function wget(fileUrl, fileName) {
     let fileNameParam = ""
     if (fileName != null) {
-        fileNameParam = "-O \"" + fileName.replace(/[^A-zА-я0-9_-\s\.:]/g,'') + "\""
+        fileNameParam = "-O \"" + fileName.replace(/[^A-zА-я0-9_-\s\.:]/g, '') + "\""
     }
     output("wget " + fileNameParam + " -c --retry-connrefused --tries=3 --timeout=5 \"" + fileUrl + "\"")
 }
@@ -25,9 +25,19 @@ function ffmpeg(videoUrl, subtitlesUrl) {
     output("ffplay " + subtitlesParam + "  -user-agent \"Mozilla/5.0\" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \"" + videoUrl + "\"")
 }
 
+// highligh current line
+let decorations = [];
+function atLine(lineIndex) {
+    lineIndex++;
+    decorations = editor.deltaDecorations(decorations, [
+        { range: new monaco.Range(lineIndex, 1, lineIndex, 99), options: { isWholeLine: true, className: 'current_row_ecoration', inlineClassName: 'current_row_ecoration' } },
+    ]);
+    editor.revealLineInCenter(lineIndex);
+}
+
 // utils
 const requestListener = new RequestListener()
-const clicker = new Clicker(requestListener,onError)
+const clicker = new Clicker(requestListener, onError)
 
 //UI Binding
 Vue.use(VueMaterial.default)
@@ -53,10 +63,16 @@ let editor = null
 //UI Actions
 function start() {
     log("start")
-    showStart()
-    const code = editor.getValue()
+    hideStart()
+    const code = editor
+        .getValue()
+        .split(/\r?\n/)
+        .map((text, index) => {
+            return "atLine(" + index + ");" + text
+        })
+        .join("\n")
     try {
-        eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" + code + ";hideStart()})")
+        eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" + code + ";showStart()})")
     } catch (e) {
         const err = e.constructor('Error: ' + e.message + "\nlineNumber: " + e.lineNumber)
         // +3 because `err` has the line number of the `eval` line plus two.
@@ -76,18 +92,18 @@ function save() {
 }
 
 //others
-function showStart() {
+function hideStart() {
     app.is_working = true
 }
-function hideStart() {
+function showStart() {
     app.is_working = false
 }
-function setFileName(filename){
+function setFileName(filename) {
     app.save_filename = filename
 }
-function onError(e){
+function onError(e) {
     showStart()
-    log(e.message)
+    log("\n\tERROR: " + e.message)
 }
 
 //function editor
