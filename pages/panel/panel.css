@@ -48,7 +48,12 @@
     float: right;
 }
 
-.current_row_ecoration {
+.current_row_decoration {
+    color: black !important;
+	background: lightskyblue !important;
+	font-weight: bold;
+}
+.current_row_decoration_error {
     color: black !important;
 	background: red !important;
 	font-weight: bold;

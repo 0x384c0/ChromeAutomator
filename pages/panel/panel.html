@@ -41,10 +41,13 @@
                                 <md-option value="anime_365.js">anime_365.js</md-option>
                             </md-select>
                         </md-field>
-                        <md-button v-if="!is_working" v-on:click="start" class="md-raised md-accent">
+                        <md-button v-if="!is_working && !is_stopping" v-on:click="start" class="md-raised md-accent">
                             <md-icon id="menu_icon">play_arrow</md-icon>
                         </md-button>
-                        <div v-if="is_working" class="md-title state_label">Working...</div>
+                        <md-button v-if="is_working && !is_stopping" v-on:click="stop" class="md-raised md-accent">
+                            <md-icon id="menu_icon">stop</md-icon>
+                        </md-button>
+                        <div v-if="is_stopping" class="md-title state_label">Stopping...</div>
                         <md-button v-on:click="reload">
                             Reload frame
                         </md-button>
