@@ -12,6 +12,9 @@ class Clicker {
     }
 
     //utils
+    _isString(value) {
+        return typeof value === 'string' || value instanceof String;
+    }
     _catchError(e) {
         console.log(e.message)
         this.onError(e)
@@ -354,12 +357,16 @@ class Clicker {
     //TODO: add wait until page load
     //actions
     scrollIntoViewIfNeeded(params) {
+        if (this._isString(params))
+            params = { selector: params }
         return this._scrollIntoViewIfNeeded(this.currentTabDebuggeeId, params.selector, params.hrefRegex)
     }
     clickCoordinate(params) {
         return this._clickCoordinates(this.currentTabDebuggeeId, params.x, params.y)
     }
     async click(params) {
+        if (this._isString(params))
+            params = { selector: params }
         if (params.iframesSelectorInfo != null && params.offset != null)
             throw "iframesSelectorInfo and offset conflicting. params: " + params
 
@@ -377,21 +384,27 @@ class Clicker {
             await this._click(this.currentTabDebuggeeId, params.selector, params.isTrusted, params.hrefRegex, params.offset)
         }
     }
-    goBack(params) {
+    goBack() {
         return this._goBack(this.currentTabDebuggeeId)
     }
     //getters
     exists(params) {
+        if (this._isString(params))
+            params = { selector: params }
         return this._exists(this.currentTabDebuggeeId, params.selector, params.innerTextRegex, params.hrefRegex)
     }
     search(params) {
+        if (this._isString(params))
+            params = { regex: params }
         return this._search(this.currentTabDebuggeeId, params.regex, params.hrefRegex)
     }
-    calculateOffset(params) {
-        return this._calculateOffset(this.currentTabDebuggeeId, params.selectorsInfo)
+    calculateOffset(selectorsInfo) {
+        return this._calculateOffset(this.currentTabDebuggeeId, selectorsInfo)
     }
     //others
     executeScript(params) {
+        if (this._isString(params))
+            params = { code: params }
         return this._executeScript(this.currentTabDebuggeeId.tabId, { code: params.code }, params.hrefRegex)
     }
     sleep(time) {
@@ -402,6 +415,8 @@ class Clicker {
         await this.sleep(50)
     }
     wait(params) {
+        if (this._isString(params))
+            params = { selector: params }
         return this._wait(this.currentTabDebuggeeId, params.selector, params.innerTextRegex, params.waitTimout, params.hrefRegex)
     }
     waitRequest(params) {

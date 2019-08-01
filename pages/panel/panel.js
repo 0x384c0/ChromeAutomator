@@ -1,7 +1,9 @@
 //constants
+const templateName = "template script"
 const scriptsInfo = [
+    { text: templateName, value: "template.js" },
     { text: "smotret-anime-365.ru", value: "anime_365.js" },
-    { text: "ts.kg", value: "ts_kg.js" }
+    { text: "ts.kg", value: "ts_kg.js" },
 ]
 
 // utils
@@ -39,7 +41,7 @@ let editor = null
 function start() {
     log("start")
     hideStart()
-    const code = processStript(editor.getValue())
+    const code = preprocessScript(editor.getValue())
     try {
         eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" +
             code + ";" +
@@ -87,13 +89,13 @@ function onError(e) {
 
 
 //preprocessor
-function processStript(code) {
+function preprocessScript(code) {
     return code
         .split(/\r?\n/)
-        .map(processStriptLine)
+        .map(preprocessScriptLine)
         .join("\n")
 }
-function processStriptLine(text, index) {
+function preprocessScriptLine(text, index) {
     let result = "atExecuteScriptLine(" + index + ");" + text
     let allowedInScriptMethodsNames = clicker.getAllowedInScriptMethodsNames()
     let methodsToFindAndReplace = allowedInScriptMethodsNames
@@ -166,7 +168,7 @@ function m3u8Header() {
     output("#EXTM3U")
 }
 function m3u8(fileUrl, fileName) {
-    output("#EXTINF:-1,\"" + fileName.replace(",","_") + "\"")
+    output("#EXTINF:-1,\"" + fileName.replace(",", "_") + "\"")
     output(fileUrl)
 }
 
@@ -186,10 +188,11 @@ async function initEditor() {
             scriptsMap[scriptInfo.text] = scriptInfo.value
         }
         const pageUrl = tab.url
-        const key = Object.keys(scriptsMap).find(url => pageUrl.includes(url))
-        if (key != null) {
-            app.selectedScript = scriptsMap[key]
+        let key = Object.keys(scriptsMap).find(url => pageUrl.includes(url))
+        if (key == null) {
+            key = templateName
         }
+        app.selectedScript = scriptsMap[key]
     })
 }
 function loadScript(url) {
