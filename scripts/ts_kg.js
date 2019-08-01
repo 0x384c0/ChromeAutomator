@@ -6,13 +6,13 @@ log("Found " + seasonsLinkSelectors.length + " seasons")
 
 for ([i, elId] of seasonsLinkSelectors.entries()) {
     click({ selector: elId })
-    sleep(pageLoadingWaitTime)
+    waitPageLoad()
     click({ selector: "#download-button" })
-    sleep(pageLoadingWaitTime)
+    waitPageLoad()
     const fileUrl = executeScript({ code: "document.querySelector(\"#dl-button > a\").href" })
     wget(fileUrl,i + ".mp4")
     goBack()
-    sleep(pageLoadingWaitTime)
+    waitPageLoad()
     goBack()
-    sleep(pageLoadingWaitTime)
+    waitPageLoad()
 }

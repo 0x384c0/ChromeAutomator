@@ -267,6 +267,29 @@ class Clicker {
     }
 
     //OTHERS
+    async _waitPageLoad(debuggeeId, hrefRegex) {
+        const pageLoadWaitTimout = 30000
+        const delay = 100
+        const repetitions = pageLoadWaitTimout / delay
+        return new Promise((resolve, reject) => {
+            var clearInterval = this._setIntervalX(delay, repetitions,
+                () => {
+                    this._executeScript(debuggeeId.tabId, { code: "document.readyState" }, hrefRegex)
+                        .then((readyState) => {
+                            if (readyState == "complete") {
+                                clearInterval()
+                                resolve()
+                            }
+                        })
+                        .catch(print)
+                },
+                () => {
+                    reject(new Error("Page not loaded hrefRegex: " + hrefRegex))
+                }
+            )
+        })
+    }
+
     _wait(debuggeeId, selector, innerTextRegex, waitTimout, hrefRegex) {
         const delay = 1000
         const repetitions = waitTimout / delay
@@ -321,6 +344,7 @@ class Clicker {
             "calculateOffset",
             "executeScript",
             "sleep",
+            "waitPageLoad",
             "wait",
             "waitRequest"
         ]
@@ -372,6 +396,10 @@ class Clicker {
     }
     sleep(time) {
         return this._sleep(time)
+    }
+    async waitPageLoad(hrefRegex) {
+        await this._waitPageLoad(this.currentTabDebuggeeId, hrefRegex)
+        await this.sleep(50)
     }
     wait(params) {
         return this._wait(this.currentTabDebuggeeId, params.selector, params.innerTextRegex, params.waitTimout, params.hrefRegex)
