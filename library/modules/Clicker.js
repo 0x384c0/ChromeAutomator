@@ -1,5 +1,3 @@
-
-
 class Clicker {
     logger = new Logger()
 
@@ -311,6 +309,23 @@ class Clicker {
         })
     }
 
+    //list of public functions
+    getAllowedInScriptMethodsNames() {
+        return [
+            "scrollIntoViewIfNeeded",
+            "clickCoordinate",
+            "click",
+            "goBack",
+            "exists",
+            "search",
+            "calculateOffset",
+            "executeScript",
+            "sleep",
+            "wait",
+            "waitRequest"
+        ]
+    }
+
     //PUBLIC
     //TODO: add wait until page load
     //actions
@@ -366,7 +381,7 @@ class Clicker {
     }
 
     //main
-    constructor(requestListener,onError) {
+    constructor(requestListener, onError) {
         this.requestListener = requestListener
         this.onError = onError
         chrome.debugger.onDetach.addListener(this._onDetach);

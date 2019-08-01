@@ -39,15 +39,12 @@ let editor = null
 function start() {
     log("start")
     hideStart()
-    const code = editor
-        .getValue()
-        .split(/\r?\n/)
-        .map((text, index) => {
-            return "atExecuteScriptLine(" + index + ");" + text
-        })
-        .join("\n")
+    const code = processStript(editor.getValue())
     try {
-        eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" + code + ";showStart()})")
+        eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" +
+            code + ";" +
+            "showStart();" +
+            "atExecuteScriptLine(lastLine, \"complete\")})")
     } catch (e) {
         const err = e.constructor('Error: ' + e.message + "\nlineNumber: " + e.lineNumber)
         // +3 because `err` has the line number of the `eval` line plus two.
@@ -83,19 +80,50 @@ function setFileName(filename) {
     app.save_filename = filename
 }
 function onError(e) {
-    atExecuteScriptLine(lastLine, true)
+    atExecuteScriptLine(lastLine, "error")
     showStart()
     log("\n\tERROR: " + e.message)
+}
+
+
+//preprocessor
+function processStript(code) {
+    return code
+        .split(/\r?\n/)
+        .map(processStriptLine)
+        .join("\n")
+}
+function processStriptLine(text, index) {
+    let result = "atExecuteScriptLine(" + index + ");" + text
+    let allowedInScriptMethodsNames = clicker.getAllowedInScriptMethodsNames()
+    let methodsToFindAndReplace = allowedInScriptMethodsNames
+        .map(name => {
+            const searchValue = "\\b" + name + "\\("
+            return {
+                searchValueRegEx: new RegExp(searchValue),
+                newValue: "await clicker." + name + "(",
+                searchRegEx: new RegExp(searchValue + ".*\\)")
+            }
+        })
+    for (method of methodsToFindAndReplace) {
+        if (method.searchRegEx.test(result)) {
+            result = result.replace(method.searchValueRegEx, method.newValue)
+            break
+        }
+    }
+    return result;
 }
 
 // highligh current line
 let isNeedStop = false
 let decorations = [];
 let lastLine = null;
-function atExecuteScriptLine(lineIndex, isError) {
+function atExecuteScriptLine(lineIndex, type) {
     let className = 'current_row_decoration'
-    if (isError != null && isError)
+    if (type == "error")
         className = 'current_row_decoration_error'
+    else if (type == "complete")
+        className = 'current_row_decoration_complete'
     lineIndex++;
     decorations = editor.deltaDecorations(decorations, [
         { range: new monaco.Range(lineIndex, 1, lineIndex, 99), options: { isWholeLine: true, className: className, inlineClassName: className } },

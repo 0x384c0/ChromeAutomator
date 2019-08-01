@@ -58,6 +58,11 @@
 	background: red !important;
 	font-weight: bold;
 }
+.current_row_decoration_complete {
+    color: black !important;
+	background: lightgreen !important;
+	font-weight: bold;
+}
 
 /* workarounds */
 
