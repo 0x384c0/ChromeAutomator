@@ -27,8 +27,9 @@ const app = new Vue({
         start: start,
         stop: stop,
         reload: () => { location.reload() },
-        copy: copy,
-        save: save,
+        copy_output: copy_output,
+        save_output: save_output,
+        clear_output: clear_output,
         didSelectedScript: (data) => {
             loadScript(chrome.extension.getURL("/scripts/" + data))
         }
@@ -60,14 +61,18 @@ function stop() {
     app.is_stopping = true
 }
 
-function copy() {
+function copy_output() {
     window.getSelection().selectAllChildren(document.getElementById("output"));
     document.execCommand("copy");
 }
 
-function save() {
+function save_output() {
     var file = new File([app.output], app.save_filename, { type: "text/plain;charset=utf-8" });
     saveAs(file);
+}
+
+function clear_output(){
+    clearOutput()
 }
 
 //others

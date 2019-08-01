@@ -62,8 +62,9 @@
                                 <label>File name</label>
                                 <md-input v-model="save_filename"></md-input>
                             </md-field>
-                            <md-button v-on:click="save" class="md-raised md-accent">Save</md-button>
-                            <md-button v-on:click="copy" id="copy_button">Copy to clipboard</md-button>
+                            <md-button v-on:click="save_output" class="md-raised md-accent">Save</md-button>
+                            <md-button v-on:click="copy_output" id="copy_button">Copy to clipboard</md-button>
+                            <md-button v-on:click="clear_output" id="clear_output_button">Clear</md-button>
                         </md-toolbar>
                     </div>
                 </div>
