@@ -145,6 +145,9 @@ function log(obj) {
 function output(text) {
     app.output += text + "\n"
 }
+function clearOutput() {
+    app.output = ""
+}
 function wget(fileUrl, fileName) {
     let fileNameParam = ""
     if (fileName != null) {
@@ -152,12 +155,19 @@ function wget(fileUrl, fileName) {
     }
     output("wget " + fileNameParam + " -c --retry-connrefused --tries=3 --timeout=5 \"" + fileUrl + "\"")
 }
-function ffmpeg(videoUrl, subtitlesUrl) {
+function ffmpeg(fileUrl, subtitlesUrl) {
     let subtitlesParam = ""
     if (subtitlesUrl != null) {
         subtitlesParam = "-vf subtitles=filename=\"" + subtitlesUrl + "\""
     }
-    output("ffplay " + subtitlesParam + "  -user-agent \"Mozilla/5.0\" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \"" + videoUrl + "\"")
+    output("ffplay " + subtitlesParam + "  -user-agent \"Mozilla/5.0\" -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 \"" + fileUrl + "\"")
+}
+function m3u8Header() {
+    output("#EXTM3U")
+}
+function m3u8(fileUrl, fileName) {
+    output("#EXTINF:-1,\"" + fileName.replace(",","_") + "\"")
+    output(fileUrl)
 }
 
 //function editor
