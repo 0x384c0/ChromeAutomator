@@ -26,7 +26,7 @@ const app = new Vue({
     methods: {
         start: start,
         stop: stop,
-        reload: () => { location.reload() },
+        reloadPage: reloadPage,
         copy_output: copy_output,
         save_output: save_output,
         clear_output: clear_output,
@@ -39,6 +39,11 @@ let editor = null
 
 
 //UI Actions
+function reloadPage() {
+    sessionStorage.setItem("editor.value", editor.getValue())
+    location.reload()
+}
+
 function start() {
     log("start")
     hideStart()
@@ -71,7 +76,7 @@ function save_output() {
     saveAs(file);
 }
 
-function clear_output(){
+function clear_output() {
     clearOutput()
 }
 
@@ -187,18 +192,24 @@ async function initEditor() {
         automaticLayout: true
     })
 
-    chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab) => {
-        const scriptsMap = {}
-        for (scriptInfo of scriptsInfo) {
-            scriptsMap[scriptInfo.text] = scriptInfo.value
-        }
-        const pageUrl = tab.url
-        let key = Object.keys(scriptsMap).find(url => pageUrl.includes(url))
-        if (key == null) {
-            key = templateName
-        }
-        app.selectedScript = scriptsMap[key]
-    })
+    const previousEditorValue = sessionStorage.getItem("editor.value")
+    sessionStorage.removeItem("editor.value")
+    if (previousEditorValue != null && previousEditorValue != "") {
+        editor.setValue(previousEditorValue)
+    } else {
+        chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab) => {
+            const scriptsMap = {}
+            for (scriptInfo of scriptsInfo) {
+                scriptsMap[scriptInfo.text] = scriptInfo.value
+            }
+            const pageUrl = tab.url
+            let key = Object.keys(scriptsMap).find(url => pageUrl.includes(url))
+            if (key == null) {
+                key = templateName
+            }
+            app.selectedScript = scriptsMap[key]
+        })
+    }
 }
 function loadScript(url) {
     if (url != null && url != "") {

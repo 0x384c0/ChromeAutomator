@@ -38,7 +38,7 @@
                     <md-toolbar id="toolbar">
                         <md-field>
                             <!-- md-selected="scriptFileChanged" -->
-                            <md-select v-model="selectedScript" @md-selected="didSelectedScript" name="script">
+                            <md-select v-model="selectedScript" @md-selected="didSelectedScript" name="script" placeholder="Edited script">
                                 <md-option v-for="selectScriptOption in selectScriptOptions"
                                     v-bind:value="selectScriptOption.value">{{ selectScriptOption.text }}</md-option>
                             </md-select>
@@ -50,8 +50,9 @@
                             <md-icon id="menu_icon">stop</md-icon>
                         </md-button>
                         <div v-if="is_stopping" class="md-title state_label">Stopping...</div>
-                        <md-button v-on:click="reload">
-                            Reload frame
+                        <div class="grow"></div>
+                        <md-button v-on:click="reloadPage">
+                            Restart
                         </md-button>
                     </md-toolbar>
                     <div id="container" class="grow"></div>
