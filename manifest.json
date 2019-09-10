@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
     "version": "0.0.1",
-    "name": "Chrome Ripper Tools",
-    "description": "Tools for ripping data from web",
+    "name": "Chrome Scraper",
+    "description": "Tools for scrape data from web",
     "icons": {
         "16": "assets/img/icon/icon_16.png",
         "48": "assets/img/icon/icon_48.png",
