@@ -1,4 +1,4 @@
-# ChromeRipperTools
+# ChromeScraper
 Automated bot for ripping data from websites
 
 ```
