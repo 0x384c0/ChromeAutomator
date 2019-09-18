@@ -15,10 +15,10 @@ class ContentScript {
 
     evalCodeInPage(code, sendResponse) {
         console_log("Content Script >>> executeScript code: " + code)
-        window.addEventListener('executeScriptResult',
+        window.addEventListener('evalCodeInPageResult',
             function receiveResult(event) {
                 //Remove this listener, but you can keep it depend on your case
-                window.removeEventListener('executeScriptResult', receiveResult, false);
+                window.removeEventListener('evalCodeInPageResult', receiveResult, false);
                 try {
                     console_log("Content Script <<< executeScript event.detail.result: " + event.detail.result)
                     sendResponse(event.detail.result)
@@ -33,6 +33,8 @@ class ContentScript {
         window.dispatchEvent(pageEvent);
     }
 
+    lastInspectedWindowExecuteScriptResult = null
+
     constructor() {
         this.injectScript('library/modules/pageScript.js');
 
@@ -40,20 +42,43 @@ class ContentScript {
         // console_log("Content Script: init onMessage window.location.href: " + window.location.href)
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             switch (request.action) {
-                case "executeScript":
+                case "executeScript": //unsafe eval is didnt work. Fidn anoher way
                     if (new RegExp(request.hrefRegex).test(window.location.href)) {
                         this.evalCodeInPage(request.code, sendResponse)
                     } else {
                         console_log("executeScript rejected location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
                     }
                     break;
+
+                case "getFullUrl":
+                    if (new RegExp(request.hrefRegex).test(window.location.href)) {
+                        sendResponse(window.location.href)
+                    } else {
+                        console_log("getFullUrl rejected location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
+                    }
+                    break;
+
+                case "getLastInspectedWindowExecuteScriptResult":
+                    if (new RegExp(request.hrefRegex).test(window.location.href)) {
+                        if (this.lastInspectedWindowExecuteScriptResult != null){
+                            sendResponse(this.lastInspectedWindowExecuteScriptResult)
+                            this.lastInspectedWindowExecuteScriptResult = null
+                        } else
+                            sendResponse(new Error("lastInspectedWindowExecuteScriptResult is null"))
+                    } else {
+                        console_log("getLastInspectedWindowExecuteScriptResult rejected location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
+                    }
+                    break;
+
                 default:
                     sendResponse("Unknown command")
                     break;
             }
         }
         )
-
+        window.addEventListener('inspectedWindowExecuteScriptResult', (event) => {
+            this.lastInspectedWindowExecuteScriptResult = event.detail.result
+        }, false)
     }
 
 }

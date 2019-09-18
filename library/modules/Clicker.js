@@ -73,12 +73,50 @@ class Clicker {
             });
     }
     _executeScript(tabId, target, hrefRegex) {
+        //chrome.devtools.inspectedWindow.eval('console.log(document.querySelector("video").getAttribute("data-url"))',{frameURL:iframeUrl})
         return new Promise((resolve, reject) => {
             if (hrefRegex != null) {
                 this.logger.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
                 var intervalID = window.setInterval(() => {
                     reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
                 }, 1000);
+
+                chrome.tabs.sendMessage(
+                    chrome.devtools.inspectedWindow.tabId,
+                    { action: "getFullUrl", code: target.code, hrefRegex: hrefRegex },
+                    (frameFullUrl) => {
+                        this.logger.log("Clicker <<< getFullUrl frameFullUrl: " + frameFullUrl)
+                        window.clearInterval(intervalID)
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError)
+                        } else if (frameFullUrl instanceof Error){
+                            reject(frameFullUrl)
+                        } else if (!(typeof frameFullUrl === 'string' || frameFullUrl instanceof String)){
+                            reject(new Error("getFullUrl is not a string"))
+                        }else {
+                            //eval code
+                            chrome.devtools.inspectedWindow.eval(
+                                "function executeCode(){" +
+                                "return " +
+                                target.code +
+                                "};" + 
+                                "let result = executeCode();" + 
+                                "window.dispatchEvent(new CustomEvent('inspectedWindowExecuteScriptResult', { detail: { result: result } }));",
+                                {frameURL:frameFullUrl}
+                                )
+                            //wait for eval complenet
+                            window.setTimeout(() => {
+                                chrome.tabs.sendMessage(
+                                    chrome.devtools.inspectedWindow.tabId,
+                                    { action: "getLastInspectedWindowExecuteScriptResult", hrefRegex: hrefRegex },
+                                    (response) => {
+                                        //get and return last result
+                                        resolve(response)
+                                });
+                            }, 50)
+                        }
+                    });
+/*
                 chrome.tabs.sendMessage(
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "executeScript", code: target.code, hrefRegex: hrefRegex },
@@ -94,6 +132,8 @@ class Clicker {
                                 resolve(response)
                         }
                     });
+*/
+
             } else {
                 chrome.tabs.executeScript(tabId, target, (response) => {
                     resolve(response[0]);
