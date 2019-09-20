@@ -73,7 +73,6 @@ class Clicker {
             });
     }
     _executeScript(tabId, target, hrefRegex) {
-        //chrome.devtools.inspectedWindow.eval('console.log(document.querySelector("video").getAttribute("data-url"))',{frameURL:iframeUrl})
         return new Promise((resolve, reject) => {
             if (hrefRegex != null) {
                 this.logger.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
@@ -100,8 +99,7 @@ class Clicker {
                                 "return " +
                                 target.code +
                                 "};" + 
-                                "let result = executeCode();" + 
-                                "window.dispatchEvent(new CustomEvent('inspectedWindowExecuteScriptResult', { detail: { result: result } }));",
+                                "window.dispatchEvent(new CustomEvent('inspectedWindowExecuteScriptResult', { detail: { result: executeCode() } }));",
                                 {frameURL:frameFullUrl}
                                 )
                             //wait for eval complenet
@@ -116,23 +114,6 @@ class Clicker {
                             }, 50)
                         }
                     });
-/*
-                chrome.tabs.sendMessage(
-                    chrome.devtools.inspectedWindow.tabId,
-                    { action: "executeScript", code: target.code, hrefRegex: hrefRegex },
-                    (response) => {
-                        this.logger.log("Clicker <<< executeScript response: " + response)
-                        window.clearInterval(intervalID)
-                        if (chrome.runtime.lastError) {
-                            reject(chrome.runtime.lastError)
-                        } else {
-                            if (response instanceof Error)
-                                reject(response)
-                            else
-                                resolve(response)
-                        }
-                    });
-*/
 
             } else {
                 chrome.tabs.executeScript(tabId, target, (response) => {
@@ -269,7 +250,7 @@ class Clicker {
         return this._executeScript(debuggeeId.tabId, { code: "document.body.innerHTML.match(new RegExp(\"" + regex + "\"))" }, hrefRegex)
     }
 
-    async _exists(debuggeeId, selector, innerTextRegex, hrefRegex) {
+    async _exists(debuggeeId, selector, innerTextRegex, hrefRegex) {//TODO: fix
         let code = "document.querySelector(\"" + selector + "\").innerText"
         var innerText = null
         try {

@@ -11,14 +11,19 @@ let playSel = "div[class='vjs-play-control vjs-control ']"
 let skipSel = "div.skip-button"
 var hasNextEpisode = false
 
-
 do {
     var isNeedWaitRequest = true
+    var isNoNeedPlay = true
     sleep(5000) //TODO: use wait page loaded 
+    let hasDataSources = executeScript({ code: 'document.querySelector("video").getAttribute("data-sources") != null', hrefRegex: videoEmbedUrl })
     let hasNoPromo = executeScript({ code: 'document.querySelector("video").getAttribute("src") != null', hrefRegex: videoEmbedUrl })
     let hasLongPromo = exists({ selector: "iframe", innerTextRegex: null, hrefRegex: videoEmbedUrl })
     let hasPromo = exists({ selector: playSel, innerTextRegex: null, hrefRegex: videoEmbedUrl })
-    if (hasNoPromo) {
+    if (hasDataSources){
+        log("Has data sources.")
+        isNeedWaitRequest = false
+        isNeedPlay = false
+    } else if (hasNoPromo) {
         log("Has No Promo.")
         isNeedWaitRequest = false
     } else if (hasLongPromo) {
@@ -40,7 +45,9 @@ do {
         sleep(500)
     }
     //play video
-    if (hasNoPromo) {
+    if (!isNeedPlay){
+        log("Scraping data withrou play")
+    }else if (hasNoPromo) {
         log("Playing video with play button")
         click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrl })
     } else if (hasLongPromo || hasPromo) {
@@ -53,18 +60,20 @@ do {
 
     //grab data
     let dataTitle = executeScript({ code: 'document.querySelector("video").getAttribute("data-title")', hrefRegex: videoEmbedUrl })
-    let dataSrc = executeScript({ code: 'document.querySelector("video").getAttribute("src")', hrefRegex: videoEmbedUrl })
+    let dataSources = executeScript({ code: 'document.querySelector("video").getAttribute("data-sources")', hrefRegex: videoEmbedUrl })
     let dataSubtitles = executeScript({ code: 'document.querySelector("video").getAttribute("data-subtitles")', hrefRegex: videoEmbedUrl })
+    let dataSrc = JSON.parse(dataSources)[0].urls[0].replace("\/", "/");
+
 
     wget(dataSrc, dataTitle + ".mp4")
-    wget(dataSubtitles, dataTitle + ".ass")
+    wget("https://smotret-anime-365.ru" + dataSubtitles, dataTitle + ".ass")
 
 
     //go to next episode
-    hasNextEpisode = exists({ selector: nexEpSel, innerTextRegex: null, hrefRegex: catalogUrl })
+    hasNextEpisode = exists(nexEpSel)
     if (hasNextEpisode) {
         log("Going to next episode")
-        click({ selector: nexEpSel, isTrusted: true, hrefRegex: catalogUrl })
+        click({ selector: nexEpSel, isTrusted: true })
     }
 } while (hasNextEpisode);
 
