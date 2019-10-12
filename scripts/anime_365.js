@@ -66,7 +66,13 @@ do {
 
 
     wget(dataSrc, dataTitle + ".mp4")
-    wget("https://smotret-anime-365.ru" + dataSubtitles, dataTitle + ".ass")
+    if (dataSubtitles != ""){
+        log(!dataSubtitles.includes("https://sub.smotret-anime-365.ru"))
+        if (!dataSubtitles.includes("https://sub.smotret-anime-365.ru")){
+            dataSubtitles = "https://smotret-anime-365.ru" + dataSubtitles
+        }
+        wget(dataSubtitles, dataTitle + ".ass")
+    }
 
 
     //go to next episode
