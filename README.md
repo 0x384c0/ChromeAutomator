@@ -1,5 +1,5 @@
 # ChromeScraper
-Automated bot for ripping data from websites
+Automated bot for web scraping. (Chrome extension)
 
 ```
 //panel
@@ -36,3 +36,8 @@ wait(selector)
 wait({ selector: selector, innerTextRegex: innerTextRegex, waitTimout: waitTimout, hrefRegex: hrefRegex })
 waitRequest({ urlRegex: urlRegex, waitTimout: waitTimout })
 ```
+
+### TODO:
+* add usage instructions in readme
+* add documentation for each function
+* edit and actualize text in popup.html
