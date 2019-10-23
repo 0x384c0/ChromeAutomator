@@ -40,4 +40,3 @@ waitRequest({ urlRegex: urlRegex, waitTimout: waitTimout })
 ### TODO:
 * add usage instructions in readme
 * add documentation for each function
-* edit and actualize text in popup.html
