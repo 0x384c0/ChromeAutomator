@@ -53,11 +53,14 @@ function start() {
         eval("clicker.start(chrome.devtools.inspectedWindow.tabId, async clicker => {" +
             code + ";" +
             "showStart();" +
-            "atExecuteScriptLine(lastLine, \"complete\")})")
+            "willExecuteScriptAtLine(lastLine, \"complete\")})")
     } catch (e) {
         const err = e.constructor('Error: ' + e.message + "\nlineNumber: " + e.lineNumber)
         // +3 because `err` has the line number of the `eval` line plus two.
         err.lineNumber = e.lineNumber - err.lineNumber + 3
+        if (err.lineNumber == null)
+            err.lineNumber = 0
+        onError(err)
         throw err;
     }
 }
@@ -93,11 +96,17 @@ function setFileName(filename) {
     app.save_filename = filename
 }
 function onError(e) {
-    atExecuteScriptLine(lastLine, "error")
+    willExecuteScriptAtLine(lastLine, "error")
     showStart()
     log("\n\tERROR: " + e.message)
 }
 
+//async utils for unsing in preprocessor
+async function forEachAsync(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+}
 
 //preprocessor
 function preprocessScript(code) {
@@ -106,10 +115,20 @@ function preprocessScript(code) {
         .map(preprocessScriptLine)
         .join("\n")
 }
-function preprocessScriptLine(text, index) {
-    let result = "atExecuteScriptLine(" + index + ");" + text
+let shouldLogNextLine = true
+function preprocessScriptLine(line, index) {
+    let hasIf = /^\s*if\s*\(.*\)\s*$/.test(line)
+    let hasElse = /^\s*}*\s*else\s*$/.test(line)
+
+    let result = shouldLogNextLine && !hasElse ? 
+        "willExecuteScriptAtLine(" + index + ");" + line :
+        line
+    //dont insert willExecuteScriptAtLine for one-line statements after if-else
+    shouldLogNextLine = !(hasIf || hasElse)
+
     let allowedInScriptMethodsNames = clicker.getAllowedInScriptMethodsNames()
-    let methodsToFindAndReplace = allowedInScriptMethodsNames
+    //clicker functions ruleToFindAndReplace
+    let rulesToFindAndReplace = allowedInScriptMethodsNames
         .map(name => {
             const searchValue = "\\b" + name + "\\("
             return {
@@ -118,7 +137,13 @@ function preprocessScriptLine(text, index) {
                 searchRegEx: new RegExp(searchValue + ".*\\)")
             }
         })
-    for (method of methodsToFindAndReplace) {
+    //forEachAsync ruleToFindAndReplace
+    rulesToFindAndReplace.push({
+        searchValueRegEx: /(\w+)\.forEach\s*\(/,
+        newValue: "await forEachAsync($1,async ",
+        searchRegEx: /\.forEach\s*\(/
+    })
+    for (method of rulesToFindAndReplace) {
         if (method.searchRegEx.test(result)) {
             result = result.replace(method.searchValueRegEx, method.newValue)
             break
@@ -131,7 +156,7 @@ function preprocessScriptLine(text, index) {
 let isNeedStop = false
 let decorations = [];
 let lastLine = null;
-function atExecuteScriptLine(lineIndex, type) {
+function willExecuteScriptAtLine(lineIndex, type) {
     let className = 'current_row_decoration'
     if (type == "error")
         className = 'current_row_decoration_error'

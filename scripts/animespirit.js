@@ -3,11 +3,13 @@ log(title)
 
 let hosts = executeScript('Array.from(document.querySelectorAll(".accordion > h3 > span")).map(sp=>sp.innerText)')
 hosts.forEach((host, hostId) => {
-    log(host)
+    log(`   ${host}`)
     let releases = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("h3 > span")).map(sp=>sp.innerText)`)
     releases.forEach((release, releaseId) => {
-        log(release)
+        log(`       ${release}`)
         let videos = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an_ul]")).map(sp=>sp.innerText)`)
-        log(videos)
+        videos.forEach((video, videoId) => {
+            log(`           ${video}`)
+        })
     })
 })
