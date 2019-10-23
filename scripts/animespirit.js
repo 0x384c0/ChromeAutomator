@@ -6,18 +6,25 @@ let title = executeScript('document.querySelector("#dle-content > div.content-bl
 log(title)
 
 let hostsObjects = []
-let hosts = executeScript('Array.from(document.querySelectorAll(".accordion > h3 > span")).map(sp=>sp.innerText)')
+let hosts = executeScript('Array.from(document.querySelectorAll(".accordion > h3 > span")).map(el=>el.innerText)')
 hosts.forEach((host, hostId) => {
     log(`   ${host}`)
-    let releases = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("h3 > span")).map(sp=>sp.innerText)`)
+    let releases = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("h3 > span")).map(el=>el.innerText)`)
     let releaseObjects = []
     releases.forEach((release, releaseId) => {
         log(`       ${release}`)
-        let videos = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an_ul]")).map(sp=>sp.innerText)`)
-        videos = videos.filter(isUrl)
-        log(`           found ${videos.length} video urls`)
-        releaseObjects.push({ title:release, videos:videos })
+        let videoUrls = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an_ul]")).map(el=>el.innerText)`)
+        videoUrls = videoUrls.filter(isUrl)
+        let titles =    executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > h3[id^=top_div_]")).map(el=>el.innerText)`)
+        
+        let videoObjects = []
+        videoUrls.forEach((videoUrl,videoUrlId) => { 
+            videoObjects.push({title:titles[videoUrlId],videoUrl:videoUrl})
+        })
+        releaseObjects.push({ title:release, videos:videoObjects })
+
+        log(`           found ${videoObjects.length} video urls`)
     })
     hostsObjects.push({ title:host, releases:releaseObjects })
 })
-debugger; 
+log(JSON.stringify(hostsObjects))

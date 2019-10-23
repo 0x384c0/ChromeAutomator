@@ -111,6 +111,7 @@ async function forEachAsync(array, callback) {
 
 //preprocessor
 function preprocessScript(code) {
+    lastLine = 0
     return code
         .split(/\r?\n/)
         .map(preprocessScriptLine)
