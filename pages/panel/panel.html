@@ -50,6 +50,9 @@
                             <md-icon id="menu_icon">stop</md-icon>
                         </md-button>
                         <div v-if="is_stopping" class="md-title state_label">Stopping...</div>
+                        <md-switch v-model="isHighlighCurrentLine">
+                            Highligh current line
+                        </md-switch>
                         <div class="grow"></div>
                         <md-button v-on:click="reloadPage">
                             Restart

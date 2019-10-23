@@ -40,3 +40,4 @@ waitRequest({ urlRegex: urlRegex, waitTimout: waitTimout })
 ### TODO:
 * add usage instructions in readme
 * add documentation for each function
+* add support for multiline statements

@@ -22,7 +22,8 @@ const app = new Vue({
         is_stopping: false,
         output: "",
         logs: "",
-        save_filename: "text.txt"
+        save_filename: "text.txt",
+        isHighlighCurrentLine: false
     },
     methods: {
         start: start,
@@ -117,14 +118,18 @@ function preprocessScript(code) {
 }
 let shouldLogNextLine = true
 function preprocessScriptLine(line, index) {
-    let hasIf = /^\s*if\s*\(.*\)\s*$/.test(line)
-    let hasElse = /^\s*}*\s*else\s*$/.test(line)
-
-    let result = shouldLogNextLine && !hasElse ? 
-        "willExecuteScriptAtLine(" + index + ");" + line :
-        line
-    //dont insert willExecuteScriptAtLine for one-line statements after if-else
-    shouldLogNextLine = !(hasIf || hasElse)
+    let result = line
+    if (app.isHighlighCurrentLine){
+        let hasIf = /^\s*if\s*\(.*\)\s*$/.test(line)
+        let hasElse = /^\s*}*\s*else\s*$/.test(line)
+        let isBlank = /^(\s|{|}|\s)*$/.test(line)
+        let isFunction = /^\s*function\s*\w+\s*\(.*$/.test(line)
+        //TODO: add support for multiline statements
+        if (shouldLogNextLine && !hasElse && !isBlank && !isFunction)
+            result = "willExecuteScriptAtLine(" + index + ");" + line
+        //dont insert willExecuteScriptAtLine for one-line statements after if-else
+        shouldLogNextLine = !(hasIf || hasElse)
+    }
 
     let allowedInScriptMethodsNames = clicker.getAllowedInScriptMethodsNames()
     //clicker functions ruleToFindAndReplace
