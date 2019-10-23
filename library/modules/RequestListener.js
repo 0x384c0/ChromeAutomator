@@ -1,6 +1,15 @@
 
 //Request listener
 //must be initialized in dev tools panel
+function getRegex(regex){
+  if (typeof regex === 'string' || regex instanceof String )
+    return new RegExp(regex)
+  else if (regex instanceof RegExp)
+    return regex
+  else 
+    throw `illegal regex: ${regex}`
+}
+
 class RequestListener {
   //public
   constructor() {
@@ -8,7 +17,7 @@ class RequestListener {
   }
   start(regex, handler) {
     this._handler = handler
-    this._regex = new RegExp(regex)
+    this._regex = getRegex(regex)
 
     if (this._isListening) {
       this.stop()
@@ -33,6 +42,8 @@ class RequestListener {
     request.getContent((body) => {
       if (request.request && request.request.url && this._regex.test(request.request.url)) {
         this._handler(request.request.url, body)
+      } else {
+       console.log("Clicker waitRequest rejected url: " + request.request.url + " urlRegex: " + this._regex)
       }
     });
   }

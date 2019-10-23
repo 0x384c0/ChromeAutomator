@@ -8,14 +8,36 @@ async function getVideoURlSibnet(videoObject){
     let videoEmbedSel = `iframe[src^='https://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
     let playSel = "#video_html5_wrapper"
     let catalogUrl = "https:..animespirit.su.trailer."
-    // click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
-    let body = waitRequest({ urlRegex: `${videoId}.mp4.st`, waitTimout: 5000 })
-    debugger
+    click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
+    let request = waitRequest({ urlRegex: /dv\d+\.sibnet\.ru.*\.mp4\?st/, waitTimout: 5000 }) //TODO: add waitRequest beforehand
+    return request.url
 }
 
-await getVideoURlSibnet({videoUrl:"http://data6.video.sibnet.ru/18/36/80/3402031.flv"})
+async function expandAccorion(sel,contentSel){
+    let isClosed = executeScript(`document.querySelector("${contentSel}").style.display == "none"`)
+    if (isClosed)
+        click(sel)
+}
+async function collapseAccorion(sel,contentSel){
+    let isClosed = executeScript(`document.querySelector("${contentSel}").style.display == "none"`)
+    if (!isClosed)
+        click(sel)
+}
 
-/*
+async function generateClassForElement(elementQueryScript){
+    let prefix = ' generated_class_'
+    let regex = / generated_class_\d+/
+    let className  = executeScript(`${elementQueryScript}.className`)
+    if (!regex.test(className)){
+        executeScript(`${elementQueryScript}.className += ${prefix}${Math.floor(Math.random() * 10000000000000000)}`)
+        className  = executeScript(`${elementQueryScript}.className`)
+    }
+    return className.match(regex)[0]
+}
+
+// await expandAccorion("#ss5","#spoiler_1")
+
+
 async function getVideoURlMuvi(videoObject){
 
 }
@@ -52,7 +74,9 @@ hosts.forEach((host, hostId) => {
 
         log(`           found ${videoObjects.length} video urls`)
     })
-    hostsObjects.push({ title:host, releases:releaseObjects })
+
+    let selector = `.${generateClassForElement(`document.querySelectorAll(".accordion > h3 > span")[${hostId}]`)}`
+    let contentSelector = `.${generateClassForElement(`document.querySelectorAll(".accordion > h3 > div")[${hostId}]`)}`
+    hostsObjects.push({ title:host, releases:releaseObjects, selector:selector, contentSelector:contentSelector })
 })
 log(JSON.stringify(hostsObjects))
-*/

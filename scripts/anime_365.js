@@ -43,7 +43,7 @@ do {
 
     if (isNeedWaitRequest) {
         //wait url
-        let body = waitRequest({ urlRegex: "/translations/embedActivation", waitTimout: 25000 })
+        let request = waitRequest({ urlRegex: "/translations/embedActivation", waitTimout: 25000 })
         sleep(500)
     }
     //play video

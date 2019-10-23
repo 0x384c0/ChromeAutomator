@@ -337,7 +337,7 @@ class Clicker {
         })
     }
 
-    _waitRequest(urlRegex, waitTimout) {
+    _waitRequest(urlRegex, waitTimout) { //TODO: add waitRequest beforehand
         return new Promise((resolve, reject) => {
             let intervalID = window.setInterval(() => {
                 this.requestListener.stop()
@@ -347,14 +347,10 @@ class Clicker {
 
             this.logger.log("Clicker >>> waitRequest urlRegex: " + urlRegex)
             this.requestListener.start(urlRegex, (url, body) => {
-                if (new RegExp(urlRegex).test(url)) {
-                    this.logger.log("Clicker <<< waitRequest url: " + url)
-                    window.clearInterval(intervalID)
-                    this.requestListener.stop()
-                    resolve(body)
-                } else {
-                    this.logger.log("Clicker waitRequest rejected url: " + url + " urlRegex: " + urlRegex)
-                }
+                this.logger.log("Clicker <<< waitRequest url: " + url)
+                window.clearInterval(intervalID)
+                this.requestListener.stop()
+                resolve({url:url,body:body})
             });
         })
     }
