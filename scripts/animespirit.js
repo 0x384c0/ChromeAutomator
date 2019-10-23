@@ -2,6 +2,33 @@ function isUrl(text){
     return /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(text)
 }
 
+async function getVideoURlSibnet(videoObject){
+    let videoId = videoObject.videoUrl.replace(/.*\/(\d+)\.flv$/,"$1")
+    let videoEmbedUrlRegex = `^https:..video.sibnet.ru.shell.php.videoid=${videoId}`//TODO: find way to use / instead  of .
+    let videoEmbedSel = `iframe[src^='https://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
+    let playSel = "#video_html5_wrapper"
+    let catalogUrl = "https:..animespirit.su.trailer."
+    // click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
+    let body = waitRequest({ urlRegex: `${videoId}.mp4.st`, waitTimout: 5000 })
+    debugger
+}
+
+await getVideoURlSibnet({videoUrl:"http://data6.video.sibnet.ru/18/36/80/3402031.flv"})
+
+/*
+async function getVideoURlMuvi(videoObject){
+
+}
+
+async function getVideoURl(videoObject){
+    if (videoObject.videoUrl.includes("sibnet"))
+        return await getVideoURlSibnet(videoObject)
+    else if (videoObject.videoUrl.includes("myvi"))
+        return await getVideoURlMuvi(videoObject)
+    else
+        return videoObject
+}
+
 let title = executeScript('document.querySelector("#dle-content > div.content-block > div > h2 > a").innerText')
 log(title)
 
@@ -28,3 +55,4 @@ hosts.forEach((host, hostId) => {
     hostsObjects.push({ title:host, releases:releaseObjects })
 })
 log(JSON.stringify(hostsObjects))
+*/

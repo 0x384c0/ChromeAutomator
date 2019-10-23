@@ -86,8 +86,9 @@ class Clicker {
                     (frameFullUrl) => {
                         this.logger.log("Clicker <<< getFullUrl frameFullUrl: " + frameFullUrl)
                         window.clearInterval(intervalID)
-                        if (chrome.runtime.lastError) {
-                            reject(chrome.runtime.lastError)
+                        let lastError = chrome.runtime.lastError
+                        if (lastError) {
+                            reject(lastError)
                         } else if (frameFullUrl instanceof Error){
                             reject(frameFullUrl)
                         } else if (!(typeof frameFullUrl === 'string' || frameFullUrl instanceof String)){
@@ -351,6 +352,8 @@ class Clicker {
                     window.clearInterval(intervalID)
                     this.requestListener.stop()
                     resolve(body)
+                } else {
+                    this.logger.log("Clicker waitRequest rejected url: " + url + " urlRegex: " + urlRegex)
                 }
             });
         })

@@ -1,11 +1,11 @@
 function console_log(obj) {
-    // console.log(obj)
+    console.log(obj)
 }
 
 //TODO: find frame by ursl regex
 function init() {
     //Listen for runtime message
-    // console_log("Page Script: init addEventListener window.location.href: " + window.location.href)
+    console_log("Page Script: init addEventListener window.location.href: " + window.location.href)
     window.addEventListener('executeScript', event => {
         console_log("Page Script >>> executeScript code: " + event.detail.code)
         let result = null

@@ -1,5 +1,5 @@
 function console_log(obj) {
-    // console.log(obj)
+    console.log(obj)
 }
 
 class ContentScript {
@@ -39,7 +39,7 @@ class ContentScript {
         this.injectScript('library/modules/pageScript.js');
 
         //Listen for runtime message
-        // console_log("Content Script: init onMessage window.location.href: " + window.location.href)
+        console_log("Content Script: init onMessage window.location.href: " + window.location.href)
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             switch (request.action) {
                 case "executeScript": //unsafe eval is didnt work. Fidn anoher way
