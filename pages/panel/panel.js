@@ -2,8 +2,9 @@
 const templateName = "template script"
 const scriptsInfo = [
     { text: templateName, value: "template.js" },
-    { text: "smotret-anime-365.ru", value: "anime_365.js" },
+    { text: "smotret-anime.online", value: "anime_365.js" },
     { text: "ts.kg", value: "ts_kg.js" },
+    { text: "animespirit.su", value: "animespirit.js" },
 ]
 
 // utils

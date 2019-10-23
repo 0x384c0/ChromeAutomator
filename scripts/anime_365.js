@@ -1,10 +1,12 @@
+//DEPRECATED: smotret-anime.online is dead
+
 log("Started")
 setFileName("download.sh")
 
-let catalogUrl = "^https://smotret-anime-365.ru/catalog/"
+let catalogUrl = "^https://smotret-anime.online/catalog/"
 let promoEmbedUrl = "^https://anime-365.ru/promo/embed"
-let videoEmbedUrl = "^https://smotret-anime-365.ru/translations/embed"
-let videoEmbedSel = "iframe[src^='https://smotret-anime-365.ru/translations/embed']"
+let videoEmbedUrl = "^https://smotret-anime.online/translations/embed"
+let videoEmbedSel = "iframe[src^='https://smotret-anime.online/translations/embed']"
 let nexEpSel = "i[class='material-icons right']"
 let skipAdSel = "Пропустить рекламу(?! \\()"
 let playSel = "div[class='vjs-play-control vjs-control ']"
@@ -67,9 +69,9 @@ do {
 
     wget(dataSrc, dataTitle + ".mp4")
     if (dataSubtitles != ""){
-        log(!dataSubtitles.includes("https://sub.smotret-anime-365.ru"))
-        if (!dataSubtitles.includes("https://sub.smotret-anime-365.ru")){
-            dataSubtitles = "https://smotret-anime-365.ru" + dataSubtitles
+        log(!dataSubtitles.includes("https://sub.smotret-anime.online"))
+        if (!dataSubtitles.includes("https://sub.smotret-anime.online")){
+            dataSubtitles = "https://smotret-anime.online" + dataSubtitles
         }
         wget(dataSubtitles, dataTitle + ".ass")
     }
