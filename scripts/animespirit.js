@@ -38,7 +38,7 @@ async function collapseSpoiler(spoiler){
         click(spoiler.spoilerSelector)
 }
 
-async function expandVideo(videoObject){
+async function expandSpoilerVideo(videoObject){
     let release = videoObject.parent
     let host = release.parent
     expandSpoiler(host)
@@ -51,19 +51,22 @@ async function expandVideo(videoObject){
 
 
 async function getVideoURlMuvi(videoObject){
-
+    throw "Not implemented"
 }
 
 async function getVideoURl(videoObject){
+    expandSpoilerVideo(videoObject)
+    let result = videoObject.videoUrl
     if (videoObject.videoUrl.includes("sibnet"))
-        return await getVideoURlSibnet(videoObject)
+        result = await getVideoURlSibnet(videoObject)
     else if (videoObject.videoUrl.includes("myvi"))
-        return await getVideoURlMuvi(videoObject)
-    else
-        return videoObject
+        result = await getVideoURlMuvi(videoObject)
+    collapseSpoiler(videoObject)
+    sleep(100)
+    return result
 }
 
-async function parseSpoilers(){
+async function parseAllVideoSpoilers(){
     let hostsObjects = []
     let hosts = executeScript('Array.from(document.querySelectorAll(".accordion > h3[id^=ss5]")).map(el=>el.innerText)')
     hosts.forEach((host, hostId) => {
@@ -101,12 +104,26 @@ async function parseSpoilers(){
     return hostsObjects
 }
 
+function isSubtitle(title){
+    return title.includes("субтит") ||  title.includes("сабы")
+}
+
 //main
+let HOST = "sibnet"
+let IS_SUBTITLES = true
+
 let title = executeScript('document.querySelector("#dle-content > div.content-block > div > h2 > a").innerText')
 log(title)
 
-let hostsObjects = parseSpoilers()
-console.log(hostsObjects)
+let hostsObjects = await parseAllVideoSpoilers()
 
-await expandVideo(hostsObjects[0].releases[0].videos[0])
+let videosToDownload = hostsObjects
+                            .find(o => o.title.toLowerCase().includes(HOST))
+                            .releases
+                            .find(o => isSubtitle(o.title.toLowerCase()))
+                            .videos
 
+videosToDownload.forEach((videoObject, videoObjectId)  => {
+    let url = await getVideoURl(videoObject)
+    wget(url, `${videoObjectId} ${videoObject.title}.mp4`)
+})

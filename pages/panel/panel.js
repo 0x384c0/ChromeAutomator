@@ -120,11 +120,11 @@ function preprocessScript(code) {
 let shouldLogNextLine = true
 function preprocessScriptLine(line, index) {
     let result = line
-    if (app.isHighlighCurrentLine){
+    if (app.isHighlighCurrentLine){//TODO: improve parser perfomance
         let hasIf = /^\s*if\s*\(.*\)\s*$/.test(line)
         let hasElse = /^\s*}*\s*else\s*$/.test(line)
         let hasElseIf = /^\s*}*\s*else\s*if\s*\(.*\)\s*$/.test(line)
-        let isBlank = /^(\s|{|}|\s)*$/.test(line)
+        let isBlank = /^(\s|{|}|\s)*$/.test(line) || /^\s*\./.test(line)
         let isFunction = /^\s*function\s*\w+\s*\(.*$/.test(line)
         //TODO: add support for multiline statements
         if (shouldLogNextLine && !hasElse && !hasElseIf && !isBlank && !isFunction)
@@ -148,7 +148,7 @@ function preprocessScriptLine(line, index) {
     rulesToFindAndReplace.push({
         searchValueRegEx: /(\w+)\.forEach\s*\(/,
         newValue: "await forEachAsync($1,async ",
-        searchRegEx: /\.forEach\s*\(.*\)\s*=>\s*{\s*/
+        searchRegEx: /\.forEach\s*\(.*\s*=>\s*{\s*/
     })
     for (method of rulesToFindAndReplace) {
         if (method.searchRegEx.test(result)) {
