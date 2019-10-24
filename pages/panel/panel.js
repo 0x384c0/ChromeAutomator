@@ -123,13 +123,14 @@ function preprocessScriptLine(line, index) {
     if (app.isHighlighCurrentLine){
         let hasIf = /^\s*if\s*\(.*\)\s*$/.test(line)
         let hasElse = /^\s*}*\s*else\s*$/.test(line)
+        let hasElseIf = /^\s*}*\s*else\s*if\s*\(.*\)\s*$/.test(line)
         let isBlank = /^(\s|{|}|\s)*$/.test(line)
         let isFunction = /^\s*function\s*\w+\s*\(.*$/.test(line)
         //TODO: add support for multiline statements
-        if (shouldLogNextLine && !hasElse && !isBlank && !isFunction)
+        if (shouldLogNextLine && !hasElse && !hasElseIf && !isBlank && !isFunction)
             result = "willExecuteScriptAtLine(" + index + ");" + line
         //dont insert willExecuteScriptAtLine for one-line statements after if-else
-        shouldLogNextLine = !(hasIf || hasElse)
+        shouldLogNextLine = !(hasIf || hasElse || hasElseIf)
     }
 
     let allowedInScriptMethodsNames = clicker.getAllowedInScriptMethodsNames()
@@ -147,7 +148,7 @@ function preprocessScriptLine(line, index) {
     rulesToFindAndReplace.push({
         searchValueRegEx: /(\w+)\.forEach\s*\(/,
         newValue: "await forEachAsync($1,async ",
-        searchRegEx: /\.forEach\s*\(/
+        searchRegEx: /\.forEach\s*\(.*\)\s*=>\s*{\s*/
     })
     for (method of rulesToFindAndReplace) {
         if (method.searchRegEx.test(result)) {
