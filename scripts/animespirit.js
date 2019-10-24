@@ -21,8 +21,14 @@ async function getVideoURlSibnet(videoObject){
     let videoEmbedSel = `iframe[src^='https://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
     let playSel = "#video_html5_wrapper"
     let catalogUrl = "https:..animespirit.su.trailer."
+    let videoFileUrlRegex = /dv\d+\.sibnet\.ru.*\.mp4\?st/
+
+    wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
+    sleep(500)
+    waitRequestInAdvance(videoFileUrlRegex)
     click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
-    let request = waitRequest({ urlRegex: /dv\d+\.sibnet\.ru.*\.mp4\?st/, waitTimout: 5000 }) //TODO: add waitRequest beforehand
+    let request = waitRequest({ urlRegex: videoFileUrlRegex, waitTimout: 10000 }) //TODO: add waitRequest beforehand
+    sleep(500)
     return request.url
 }
 
@@ -46,7 +52,6 @@ async function expandSpoilerVideo(videoObject){
     expandSpoiler(release)
     sleep(100)
     expandSpoiler(videoObject)
-    sleep(1000)
 }
 
 
@@ -82,7 +87,7 @@ async function parseAllVideoSpoilers(){
             let videoObjects = []
             videoUrls.forEach((videoUrl,videoUrlId) => {
                 let spoilerSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > h3[id^=top_div_]")[${videoUrlId}]`)}`
-                let contentSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an]")[${videoUrlId}]`)}`
+                let contentSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an][align=center]")[${videoUrlId}]`)}`
                 let object = {title:titles[videoUrlId],videoUrl:videoUrl, spoilerSelector:spoilerSelector, contentSelector:contentSelector}
                 videoObjects.push(object)
             })
@@ -112,6 +117,10 @@ function isSubtitle(title){
 let HOST = "sibnet"
 let IS_SUBTITLES = true
 
+log("Started")
+clearOutput()
+setFileName("download.sh")
+
 let title = executeScript('document.querySelector("#dle-content > div.content-block > div > h2 > a").innerText')
 log(title)
 
@@ -127,3 +136,5 @@ videosToDownload.forEach((videoObject, videoObjectId)  => {
     let url = await getVideoURl(videoObject)
     wget(url, `${videoObjectId} ${videoObject.title}.mp4`)
 })
+
+log("Finished");

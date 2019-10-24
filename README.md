@@ -34,6 +34,7 @@ sleep(time)
 waitPageLoad(hrefRegex)
 wait(selector)
 wait({ selector: selector, innerTextRegex: innerTextRegex, waitTimout: waitTimout, hrefRegex: hrefRegex })
+waitRequestInAdvance(urlRegex)
 waitRequest({ urlRegex: urlRegex, waitTimout: waitTimout })
 ```
 

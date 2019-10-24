@@ -76,16 +76,16 @@ class Clicker {
         return new Promise((resolve, reject) => {
             if (hrefRegex != null) {
                 this.logger.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
-                var intervalID = window.setInterval(() => {
+                var clearInterval = this._setIntervalX(1000,1,() => {
                     reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
-                }, 1000);
+                });
 
                 chrome.tabs.sendMessage(
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "getFullUrl", code: target.code, hrefRegex: hrefRegex },
                     (frameFullUrl) => {
                         this.logger.log("Clicker <<< getFullUrl frameFullUrl: " + frameFullUrl)
-                        window.clearInterval(intervalID)
+                        clearInterval()
                         let lastError = chrome.runtime.lastError
                         if (lastError) {
                             reject(lastError)
@@ -331,25 +331,31 @@ class Clicker {
                         .catch(print)
                 },
                 () => {
-                    reject(new Error("Element with selector: \"" + selector + "\" innerTextRegex: \"" + innerTextRegex + "\" not exists."))
+                    reject(new Error(`Element not exists. selector: "${selector}" innerTextRegex: "${innerTextRegex}" hrefRegex: "${hrefRegex}"`))
                 }
             )
         })
     }
 
+    _waitRequestInAdvance(urlRegex){
+        return new Promise((resolve, reject) => {
+            this.requestListener.startInAdvance(urlRegex)
+            resolve()
+        })
+    }
+
     _waitRequest(urlRegex, waitTimout) { //TODO: add waitRequest beforehand
         return new Promise((resolve, reject) => {
-            let intervalID = window.setInterval(() => {
+            let clearInterval = this._setIntervalX(waitTimout,1,() => {
                 this.requestListener.stop()
                 reject(new Error("Clicker: waitRequest timeout urlRegex: " + urlRegex))
-            }, waitTimout)
-
+            })
 
             this.logger.log("Clicker >>> waitRequest urlRegex: " + urlRegex)
             this.requestListener.start(urlRegex, (url, body) => {
-                this.logger.log("Clicker <<< waitRequest url: " + url)
-                window.clearInterval(intervalID)
+                clearInterval()
                 this.requestListener.stop()
+                this.logger.log("Clicker <<< waitRequest url: " + url)
                 resolve({url:url,body:body})
             });
         })
@@ -369,7 +375,8 @@ class Clicker {
             "sleep",
             "waitPageLoad",
             "wait",
-            "waitRequest"
+            "waitRequest",
+            "waitRequestInAdvance"
         ]
     }
 
@@ -438,6 +445,9 @@ class Clicker {
         if (this._isString(params))
             params = { selector: params }
         return this._wait(this.currentTabDebuggeeId, params.selector, params.innerTextRegex, params.waitTimout, params.hrefRegex)
+    }
+    waitRequestInAdvance(urlRegex){
+        this._waitRequestInAdvance(urlRegex)
     }
     waitRequest(params) {
         return this._waitRequest(params.urlRegex, params.waitTimout)
