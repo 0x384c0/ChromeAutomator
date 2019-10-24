@@ -14,8 +14,9 @@ class RequestListener {
   //public
   constructor() {
     this._currentListener = null
+    this._alredyGotRequest = false
   }
-  start(regex, handler) {
+  start(regex, isStopAfterFirstRequest, handler) {
 
     this._regex = getRegex(regex)
 
@@ -38,6 +39,8 @@ class RequestListener {
         this._currentListener = response => {
           this._onRequestFinished(response)
         }
+        this._alredyGotRequest = false
+        this._isStopAfterFirstRequest = isStopAfterFirstRequest
         chrome.devtools.network.onRequestFinished.addListener(this._currentListener);
       }
     }
@@ -78,8 +81,14 @@ class RequestListener {
       if (request.request && request.request.url && this._regex.test(request.request.url)) {
         if (this._isListeningInAdvance)
           this._lastRequestInAdvance = {url: request.request.url, body:body, regex:this._regex}
-        else
-          this._handler(request.request.url, body)
+        else{
+          let alredyGotRequest = this._alredyGotRequest
+          this._alredyGotRequest = true
+          if (alredyGotRequest && this._isStopAfterFirstRequest)
+            this.stop()
+          else
+            this._handler(request.request.url, body)
+        }
       }
     });
   }

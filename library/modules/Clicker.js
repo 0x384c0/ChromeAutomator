@@ -1,3 +1,4 @@
+let DISCONNECT_DEBUGGER_AFTER_CLICK_COORDINATE = true 
 class Clicker {
     logger = new Logger()
 
@@ -145,7 +146,8 @@ class Clicker {
             callback();
             if (++x === repetitions) {
                 window.clearInterval(intervalID);
-                finished()
+                if (finished != null)
+                    finished()
             }
         }, delay);
         return () => { window.clearInterval(intervalID) }
@@ -209,7 +211,12 @@ class Clicker {
         clickEvent.type = 'mousePressed';
         await this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
         clickEvent.type = 'mouseReleased';
-        return this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
+        await this._sendCommand(debuggeeId, 'Input.dispatchMouseEvent', clickEvent);
+        if (DISCONNECT_DEBUGGER_AFTER_CLICK_COORDINATE){ //TODO: find better workaround, dispatchMouseEvent stops work after somte time after enabling debugger
+            await this._sleep(100)
+            await this._disconnectDebuggerIfNeeded(debuggeeId)
+            await this._sleep(100)
+        }
     }
 
     async _scrollIntoViewIfNeeded(debuggeeId, selector, hrefRegex) {
@@ -220,6 +227,7 @@ class Clicker {
     async _click(debuggeeId, selector, isTrusted, hrefRegex, offset) {
         if (isTrusted) {
             await this._scrollIntoViewIfNeeded(debuggeeId, selector, hrefRegex)
+            await this._sleep(100)
             return this._clickWithDebugger(debuggeeId, selector, hrefRegex, offset)
         } else {
             return this._executeScript(debuggeeId.tabId, { code: "document.querySelector(\"" + selector + "\").dispatchEvent(new MouseEvent(\"click\"))" }, hrefRegex)
@@ -352,9 +360,8 @@ class Clicker {
             })
 
             this.logger.log("Clicker >>> waitRequest urlRegex: " + urlRegex)
-            this.requestListener.start(urlRegex, (url, body) => {
+            this.requestListener.start(urlRegex, true, (url, body) => {
                 clearInterval()
-                this.requestListener.stop()
                 this.logger.log("Clicker <<< waitRequest url: " + url)
                 resolve({url:url,body:body})
             });
