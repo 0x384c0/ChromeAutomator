@@ -345,14 +345,15 @@ class Clicker {
         })
     }
 
-    _waitRequestInAdvance(urlRegex){
+    _waitRequestInAdvance(urlRegex, isOnBeforeRequest){
         return new Promise((resolve, reject) => {
-            this.requestListener.startInAdvance(urlRegex)
+            this.logger.log("Clicker _waitRequestInAdvance urlRegex: " + urlRegex)
+            this.requestListener.startInAdvance(urlRegex,isOnBeforeRequest)
             resolve()
         })
     }
 
-    _waitRequest(urlRegex, waitTimout) { //TODO: add waitRequest beforehand
+    _waitRequest(urlRegex, isOnBeforeRequest, waitTimout) { //TODO: add waitRequest beforehand
         return new Promise((resolve, reject) => {
             let clearInterval = this._setIntervalX(waitTimout,1,() => {
                 this.requestListener.stop()
@@ -360,7 +361,7 @@ class Clicker {
             })
 
             this.logger.log("Clicker >>> waitRequest urlRegex: " + urlRegex)
-            this.requestListener.start(urlRegex, true, (url, body) => {
+            this.requestListener.start(urlRegex, isOnBeforeRequest, true, (url, body) => {
                 clearInterval()
                 this.logger.log("Clicker <<< waitRequest url: " + url)
                 resolve({url:url,body:body})
@@ -453,11 +454,13 @@ class Clicker {
             params = { selector: params }
         return this._wait(this.currentTabDebuggeeId, params.selector, params.innerTextRegex, params.waitTimout, params.hrefRegex)
     }
-    waitRequestInAdvance(urlRegex){
-        this._waitRequestInAdvance(urlRegex)
+    waitRequestInAdvance(params){
+        this._waitRequestInAdvance(params.urlRegex, params.isOnBeforeRequest)
     }
     waitRequest(params) {
-        return this._waitRequest(params.urlRegex, params.waitTimout)
+        if (params.isOnBeforeRequest == null)
+            params.isOnBeforeRequest = false
+        return this._waitRequest(params.urlRegex, params.isOnBeforeRequest, params.waitTimout)
     }
 
     //main

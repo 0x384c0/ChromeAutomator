@@ -25,9 +25,9 @@ async function getVideoURlSibnet(videoObject){
 
     wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
     sleep(500)
-    waitRequestInAdvance(videoFileUrlRegex)
+    waitRequestInAdvance({urlRegex:videoFileUrlRegex, isOnBeforeRequest: true})
     click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
-    let request = waitRequest({ urlRegex: videoFileUrlRegex, waitTimout: 3000 })
+    let request = waitRequest({ urlRegex: videoFileUrlRegex, isOnBeforeRequest: true, waitTimout: 3000 })
     return request.url
 }
 
@@ -130,9 +130,9 @@ let videosToDownload = hostsObjects
                             .releases
                             .find(o => isSubtitle(o.title.toLowerCase()))
                             .videos
-await getVideoURl(videosToDownload[1])
-await getVideoURl(videosToDownload[2])
-await getVideoURl(videosToDownload[3])
+log(await getVideoURl(videosToDownload[1]))
+log(await getVideoURl(videosToDownload[2]))
+log(await getVideoURl(videosToDownload[3]))
 // videosToDownload.forEach((videoObject, videoObjectId)  => {
 //     let url = await getVideoURl(videoObject)
 //     wget(url, `${videoObjectId} ${videoObject.title}.mp4`)

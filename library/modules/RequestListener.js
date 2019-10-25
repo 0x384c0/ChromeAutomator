@@ -15,8 +15,10 @@ class RequestListener {
   constructor() {
     this._currentListener = null
     this._alredyGotRequest = false
+    this._isOnBeforeRequest = null
   }
-  start(regex, isStopAfterFirstRequest, handler) {
+  start(regex, isOnBeforeRequest, isStopAfterFirstRequest, handler) {
+    this._isOnBeforeRequest = isOnBeforeRequest
 
     this._regex = getRegex(regex)
 
@@ -41,18 +43,21 @@ class RequestListener {
         }
         this._alredyGotRequest = false
         this._isStopAfterFirstRequest = isStopAfterFirstRequest
-        chrome.devtools.network.onRequestFinished.addListener(this._currentListener);
+        this._addListener(this._currentListener);
       }
     }
   }
   stop() {
     if (this._isListening) {
-      chrome.devtools.network.onRequestFinished.removeListener(this._currentListener);
+      this._removeListener(this._currentListener);
+      this._isOnBeforeRequest = null
       this._currentListener = null
     }
   }
 
-  startInAdvance(regex){
+  startInAdvance(regex, isOnBeforeRequest){
+    this._isOnBeforeRequest = isOnBeforeRequest
+
     this._regex = getRegex(regex)
 
     if (this._isListening) {
@@ -65,7 +70,7 @@ class RequestListener {
       this._onRequestFinished(response)
     }
     this._handler = null
-    chrome.devtools.network.onRequestFinished.addListener(this._currentListener)
+    this._addListener(this._currentListener)
   }
 
   //private
@@ -77,19 +82,55 @@ class RequestListener {
   }
 
   _onRequestFinished(request) {
-    request.getContent((body) => {
-      if (request.request && request.request.url && this._regex.test(request.request.url)) {
+    if (this._isOnBeforeRequest){
+      console.log("onBeforeRequest")
+      console.log(request)
+      let url = request.redirectUrl != null ? request.redirectUrl : request.url
+      console.log(url)
+      this._onRequestFinishedWithBody(url,null)
+    } else{
+      console.log("onRequestFinished")//TODO: should not be called
+      console.log(request)
+      let url = (request.response != null && request.response.redirectURL != null) ? request.response.redirectURL : request.request.url
+      if (url == null)
+        request.url
+      console.log(url)
+      request.getContent(body => this._onRequestFinishedWithBody(url,body))
+    }
+  }
+
+  _onRequestFinishedWithBody(url,body){
+      if (url && this._regex.test(url)) {
         if (this._isListeningInAdvance)
-          this._lastRequestInAdvance = {url: request.request.url, body:body, regex:this._regex}
+          this._lastRequestInAdvance = {url: url, body:body, regex:this._regex}
         else{
           let alredyGotRequest = this._alredyGotRequest
           this._alredyGotRequest = true
           if (alredyGotRequest && this._isStopAfterFirstRequest)
             this.stop()
           else
-            this._handler(request.request.url, body)
+            this._handler(url, body)
         }
+      } else {
+        // console.log(`_onRequestFinished rejected url: ${url} regex: ${this._regex}`)
       }
-    });
+  }
+
+  _addListener(listener){
+    if (this._isOnBeforeRequest){
+      let filter = {  urls: ["<all_urls>"]  }
+      chrome.webRequest.onBeforeRequest.addListener(listener,filter)
+    }
+    else
+      chrome.devtools.network.onRequestFinished.addListener(listener)
+  }
+  _removeListener(listener){
+    if (this._isOnBeforeRequest == null)
+      throw 'RequestListener illegal state: this._isOnBeforeRequest is null'
+    if (this._isOnBeforeRequest)
+      chrome.webRequest.onBeforeRequest.removeListener(listener)
+    else{
+      chrome.devtools.network.onRequestFinished.removeListener(listener)
+    }
   }
 }

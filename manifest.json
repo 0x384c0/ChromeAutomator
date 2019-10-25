@@ -40,6 +40,7 @@
         "activeTab",
         "tabs",
         "storage",
+        "webRequest",
         "<all_urls>"
     ]
 }
