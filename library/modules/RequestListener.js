@@ -50,7 +50,7 @@ class RequestListener {
   stop() {
     if (this._isListening) {
       this._removeListener(this._currentListener);
-      this._isOnBeforeRequest = null
+      // this._isOnBeforeRequest = null
       this._currentListener = null
     }
   }
@@ -83,18 +83,18 @@ class RequestListener {
 
   _onRequestFinished(request) {
     if (this._isOnBeforeRequest){
-      console.log("onBeforeRequest")
-      console.log(request)
       let url = request.redirectUrl != null ? request.redirectUrl : request.url
-      console.log(url)
+      // console.log("onBeforeRequest")
+      // console.log(request)
+      // console.log(url)
       this._onRequestFinishedWithBody(url,null)
     } else{
-      console.log("onRequestFinished")//TODO: should not be called
-      console.log(request)
       let url = (request.response != null && request.response.redirectURL != null) ? request.response.redirectURL : request.request.url
       if (url == null)
         request.url
-      console.log(url)
+      // console.log("onRequestFinished")
+      // console.log(request)
+      // console.log(url)
       request.getContent(body => this._onRequestFinishedWithBody(url,body))
     }
   }

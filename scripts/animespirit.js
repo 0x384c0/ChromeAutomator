@@ -130,12 +130,9 @@ let videosToDownload = hostsObjects
                             .releases
                             .find(o => isSubtitle(o.title.toLowerCase()))
                             .videos
-log(await getVideoURl(videosToDownload[1]))
-log(await getVideoURl(videosToDownload[2]))
-log(await getVideoURl(videosToDownload[3]))
-// videosToDownload.forEach((videoObject, videoObjectId)  => {
-//     let url = await getVideoURl(videoObject)
-//     wget(url, `${videoObjectId} ${videoObject.title}.mp4`)
-// })
+videosToDownload.forEach((videoObject, videoObjectId)  => {
+    let url = await getVideoURl(videoObject)
+    wget(url, `${videoObjectId + 1} ${videoObject.title}.mp4`)
+})
 
 log("Finished");

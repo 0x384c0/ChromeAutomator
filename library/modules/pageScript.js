@@ -1,5 +1,5 @@
 function console_log(obj) {
-    console.log(obj)
+    // console.log(obj)
 }
 
 //TODO: find frame by ursl regex
