@@ -39,6 +39,7 @@ waitRequest({ urlRegex: urlRegex, waitTimout: waitTimout })
 ```
 
 ### TODO:
+* tabs.executeScript is deprecated, use only chrome.devtools.inspectedWindow.eval
 * add usage instructions in readme
 * add documentation for each function
 * add support for multiline statements

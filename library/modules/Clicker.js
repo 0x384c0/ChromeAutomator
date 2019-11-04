@@ -118,7 +118,7 @@ class Clicker {
                     });
 
             } else {
-                chrome.tabs.executeScript(tabId, target, (response) => {
+                chrome.tabs.executeScript(tabId, target, (response) => { //TODO: tabs.executeScript is deprecated, use only chrome.devtools.inspectedWindow.eval
                     resolve(response[0]);
                 });
             }
