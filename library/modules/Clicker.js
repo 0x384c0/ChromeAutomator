@@ -13,6 +13,9 @@ class Clicker {
     }
 
     //utils
+    _log(object){
+        this.logger.log(`Clicker: ${object}`)
+    }
     _isString(value) {
         return typeof value === 'string' || value instanceof String;
     }
@@ -77,16 +80,17 @@ class Clicker {
     _executeScript(tabId, target, hrefRegex) {
         return new Promise((resolve, reject) => {
             if (hrefRegex != null) {
-                this.logger.log("Clicker >>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
+                this._log(">>> executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
                 var clearInterval = this._setIntervalX(1000,1,() => {
                     reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
                 });
 
+                this._log(">>> getFullUrl frameFullUrl: " + hrefRegex)
                 chrome.tabs.sendMessage(
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "getFullUrl", code: target.code, hrefRegex: hrefRegex },
                     (frameFullUrl) => {
-                        this.logger.log("Clicker <<< getFullUrl frameFullUrl: " + frameFullUrl)
+                        this._log("<<< getFullUrl frameFullUrl: " + frameFullUrl)
                         clearInterval()
                         let lastError = chrome.runtime.lastError
                         if (lastError) {
@@ -105,13 +109,14 @@ class Clicker {
                                 "window.dispatchEvent(new CustomEvent('inspectedWindowExecuteScriptResult', { detail: { result: executeCode() } }));",
                                 {frameURL:frameFullUrl}
                                 )
-                            //wait for eval complenet
+                            //wait for eval complenet                     
                             window.setTimeout(() => {
                                 chrome.tabs.sendMessage(
                                     chrome.devtools.inspectedWindow.tabId,
                                     { action: "getLastInspectedWindowExecuteScriptResult", hrefRegex: hrefRegex },
                                     (response) => {
                                         //get and return last result
+                                        this._log("<<< executeScript target.code: " + target.code + " hrefRegex: " + hrefRegex)
                                         resolve(response)
                                 });
                             }, 50)
@@ -141,7 +146,7 @@ class Clicker {
 
     // internal utils
 
-    _setIntervalX(delay, repetitions, callback, finished) {
+    _setIntervalX(delay, repetitions, callback, finished) { //TODO: make callback async
         var x = 0;
         var intervalID = window.setInterval(() => {
             callback();
@@ -267,6 +272,7 @@ class Clicker {
             innerText = await this._executeScript(debuggeeId.tabId, { code: code }, hrefRegex);
         } catch (e) {
             if (e.message == "The message port closed before a response was received.") {
+                this.logger.log("not found element for selector: " + selector)
                 return false
             } else {
                 throw e
@@ -282,6 +288,8 @@ class Clicker {
             let result = array != undefined && array != null && array.length != 0;
             if (!result) {
                 this.logger.log("found element for selector: " + selector + " innerTextRegex: " + innerTextRegex + " but innerText was: " + innerText);
+            } else {
+                this.logger.log("not found element for selector: " + selector)
             }
             return result;
         }
@@ -335,7 +343,7 @@ class Clicker {
                             if (exists) {
                                 clearInterval()
                                 resolve(exists)
-                            }
+                            } else
                         })
                         .catch(print)
                 },
@@ -348,7 +356,7 @@ class Clicker {
 
     _waitRequestInAdvance(urlRegex, isOnBeforeRequest){
         return new Promise((resolve, reject) => {
-            this.logger.log("Clicker _waitRequestInAdvance urlRegex: " + urlRegex)
+            this._log("_waitRequestInAdvance urlRegex: " + urlRegex)
             this.requestListener.startInAdvance(urlRegex,isOnBeforeRequest)
             resolve()
         })
@@ -361,10 +369,10 @@ class Clicker {
                 reject(new Error("Clicker: waitRequest timeout urlRegex: " + urlRegex))
             })
 
-            this.logger.log("Clicker >>> waitRequest urlRegex: " + urlRegex)
+            this._log(">>> waitRequest urlRegex: " + urlRegex)
             this.requestListener.start(urlRegex, isOnBeforeRequest, true, (url, body) => {
                 clearInterval()
-                this.logger.log("Clicker <<< waitRequest url: " + url)
+                this._log("<<< waitRequest url: " + url)
                 resolve({url:url,body:body})
             });
         })
