@@ -20,7 +20,7 @@ async function getVideoURlSibnet(videoObject){
     let videoEmbedUrlRegex = `^https:..video.sibnet.ru.shell.php.videoid=${videoId}`//TODO: find way to use / instead  of .
     let videoEmbedSel = `iframe[src^='https://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
     let playSel = "#video_html5_wrapper"
-    let catalogUrl = "https:..animespirit.su.trailer."
+    let catalogUrl = "https:..animespirit.su.anime."
     let videoFileUrlRegex = /dv\d+\.sibnet\.ru.*\.mp4\?st/
 
     wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
