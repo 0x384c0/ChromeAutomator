@@ -20,6 +20,7 @@
                 "<all_urls>"
             ],
             "js": [
+                "library/modules/Storage.js",
                 "library/modules/contentScript.js"
             ],
             "all_frames": true

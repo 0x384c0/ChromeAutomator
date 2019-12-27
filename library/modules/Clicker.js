@@ -17,6 +17,7 @@ class Clicker {
         return typeof value === 'string' || value instanceof String;
     }
     _catchError(e) {
+        console.trace()
         console.log(e.message)
         this.onError(e)
         throw e

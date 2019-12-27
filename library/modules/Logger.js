@@ -6,8 +6,10 @@ class Logger {
     }
 
     _log(object) {
-        if (this.isVerboseLogging)
+        if (this.isVerboseLogging){
+            // console.trace()
             console.log(object)
+        }
     }
 
     reset(){
