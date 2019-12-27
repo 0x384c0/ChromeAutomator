@@ -75,24 +75,24 @@ async function parseAllVideoSpoilers(){
     let hosts = executeScript('Array.from(document.querySelectorAll(".accordion > h3[id^=ss5]")).map(el=>el.innerText)')
     hosts.forEach((host, hostId) => {
         log(`   ${host}`)
-        let releases = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("h3[id^=ss5]")).map(el=>el.innerText)`)
+        let releases = executeScript(`Array.from(document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("h3[id^=ss5]")).map(el=>el.innerText)`)
         let releaseObjects = []
         releases.forEach((release, releaseId) => {
             log(`       ${release}`)
-            let videoUrls = executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an_ul]")).map(el=>el.innerText)`)
+            let videoUrls = executeScript(`Array.from(document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an_ul]")).map(el=>el.innerText)`)
             videoUrls = videoUrls.filter(isUrl)
-            let titles =    executeScript(`Array.from(document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > h3[id^=top_div_]")).map(el=>el.innerText)`)
+            let titles =    executeScript(`Array.from(document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > h3[id^=top_div_]")).map(el=>el.innerText)`)
             
             let videoObjects = []
             videoUrls.forEach((videoUrl,videoUrlId) => {
-                let spoilerSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > h3[id^=top_div_]")[${videoUrlId}]`)}`
-                let contentSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an][align=center]")[${videoUrlId}]`)}`
+                let spoilerSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > h3[id^=top_div_]")[${videoUrlId}]`)}`
+                let contentSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("div > center > div")[${releaseId}].querySelectorAll("center > p[id^=an][align=center]")[${videoUrlId}]`)}`
                 let object = {title:titles[videoUrlId],videoUrl:videoUrl, spoilerSelector:spoilerSelector, contentSelector:contentSelector}
                 videoObjects.push(object)
             })
 
-            let spoilerSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("h3[id^=ss5]")[${releaseId}]`)}`
-            let contentSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div")[${hostId}].querySelectorAll("div > center > div")[${releaseId}]`)}`
+            let spoilerSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("h3[id^=ss5]")[${releaseId}]`)}`
+            let contentSelector = `.${await generateClassForElement(`document.querySelectorAll(".accordion > div[id^=spoiler_]")[${hostId}].querySelectorAll("div > center > div")[${releaseId}]`)}`
             let object = { title:release, videos:videoObjects, spoilerSelector:spoilerSelector, contentSelector:contentSelector }
             videoObjects.forEach(childObject => childObject.parent = object)
             releaseObjects.push(object)
