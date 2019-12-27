@@ -20,7 +20,6 @@ class Clicker {
         return typeof value === 'string' || value instanceof String;
     }
     _catchError(e) {
-        console.trace()
         console.log(e.message)
         this.onError(e)
         throw e
@@ -85,12 +84,12 @@ class Clicker {
                     reject(new Error("executeScript failed hrefRegex: " + hrefRegex + " target: " + target));
                 });
 
-                this._log(">>> getFullUrl frameFullUrl: " + hrefRegex)
+                this._log("    >>> getFullUrl frameFullUrl: " + hrefRegex)
                 chrome.tabs.sendMessage(
                     chrome.devtools.inspectedWindow.tabId,
                     { action: "getFullUrl", code: target.code, hrefRegex: hrefRegex },
                     (frameFullUrl) => {
-                        this._log("<<< getFullUrl frameFullUrl: " + frameFullUrl)
+                        this._log("    <<< getFullUrl frameFullUrl: " + frameFullUrl)
                         clearInterval()
                         let lastError = chrome.runtime.lastError
                         if (lastError) {
@@ -343,7 +342,7 @@ class Clicker {
                             if (exists) {
                                 clearInterval()
                                 resolve(exists)
-                            } else
+                            }
                         })
                         .catch(print)
                 },

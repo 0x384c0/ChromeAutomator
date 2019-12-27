@@ -77,7 +77,7 @@ class ContentScript {
                     if (new RegExp(request.hrefRegex).test(window.location.href)) {
                         if (this.lastInspectedWindowExecuteScriptResult != null){
                             this.console_log("getLastInspectedWindowExecuteScriptResult accepted location.href: " + window.location.href + " request.hrefRegex: " + request.hrefRegex)
-                            sendResponse(this.lastInspectedWindowExecuteScriptResult)
+                            sendResponse(this.lastInspectedWindowExecuteScriptResult.result)
                             this.lastInspectedWindowExecuteScriptResult = null
                         } else
                             sendResponse(new Error("lastInspectedWindowExecuteScriptResult is null"))
@@ -93,7 +93,7 @@ class ContentScript {
         }
         )
         window.addEventListener('inspectedWindowExecuteScriptResult', (event) => {
-            this.lastInspectedWindowExecuteScriptResult = event.detail.result
+            this.lastInspectedWindowExecuteScriptResult = {result : event.detail.result}
         }, false)
     }
 
