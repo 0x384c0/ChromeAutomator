@@ -17,10 +17,10 @@ async function generateClassForElement(elementQueryScript){
 //networking
 async function getVideoURlSibnet(videoObject){
     let videoId = videoObject.videoUrl.replace(/.*\/(\d+)\.flv$/,"$1")
-    let videoEmbedUrlRegex = `^https:..video.sibnet.ru.shell.php.videoid=${videoId}`//TODO: find way to use / instead  of .
-    let videoEmbedSel = `iframe[src^='https://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
+    let videoEmbedUrlRegex = `^https?:..video.sibnet.ru.shell.php.videoid=${videoId}`//TODO: find way to use / instead  of .
+    let videoEmbedSel = `iframe[src*='://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
     let playSel = "#video_html5_wrapper"
-    let catalogUrl = "https:..animespirit.su.anime."
+    let catalogUrl = "https?:..(www.)?animespirit.ru.anime."
     let videoFileUrlRegex = /dv\d+\.sibnet\.ru.*\.mp4\?st/
 
     wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
