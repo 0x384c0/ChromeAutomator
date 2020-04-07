@@ -31,6 +31,22 @@ async function getVideoURlSibnet(videoObject){
     return request.url
 }
 
+async function getVideoURlMuvi(videoObject){
+    let videoId = videoObject.videoUrl.replace(/.*embed\/(.*)$/,"$1")
+    let videoEmbedUrlRegex = `^https?:..www.myvi.tv.embed.${videoId}`
+    let videoEmbedSel = `iframe[src*='://www.myvi.tv/embed']`
+    let playSel = "#player > div.player-splashscreen.player-element.player-show"
+    let videoFileUrlRegex = /https?:.*\.myvi.tv.*\/\d+\.mp4\?\&s=/
+    let catalogUrl = "https?:..(www.)?animespirit.ru.anime."
+    
+    wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
+    sleep(500)
+    waitRequestInAdvance({urlRegex:videoFileUrlRegex, isOnBeforeRequest: true})
+    click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
+    let request = waitRequest({ urlRegex: videoFileUrlRegex, isOnBeforeRequest: true, waitTimout: 3000 })
+    return request.url
+}
+
 //actions
 async function expandSpoiler(spoiler){
     let isClosed = executeScript(`document.querySelector("${spoiler.contentSelector}").style.display == "none"`)
@@ -51,11 +67,6 @@ async function expandSpoilerVideo(videoObject){
     expandSpoiler(release)
     sleep(100)
     expandSpoiler(videoObject)
-}
-
-
-async function getVideoURlMuvi(videoObject){
-    throw "Not implemented"
 }
 
 async function getVideoURl(videoObject){
@@ -113,7 +124,9 @@ function isSubtitle(title){
 }
 
 //main
-let HOST = "sibnet"
+//let HOST = "sibnet"
+let HOST = "myvi"
+
 let IS_SUBTITLES = true
 
 log("Started")
