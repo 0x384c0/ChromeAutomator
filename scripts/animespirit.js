@@ -18,7 +18,7 @@ async function generateClassForElement(elementQueryScript){
 async function getVideoURlSibnet(videoObject){
     let videoId = videoObject.videoUrl.replace(/.*\/(\d+)\.flv$/,"$1")
     let videoEmbedUrlRegex = `^https?:..video.sibnet.ru.shell.php.videoid=${videoId}`//TODO: find way to use / instead  of .
-    let videoEmbedSel = `iframe[src*='://video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
+    let videoEmbedSel = `iframe[src*='video.sibnet.ru/shell.php?videoid=']` //TODO: find way to use ", not only '
     let playSel = "#video_html5_wrapper"
     let catalogUrl = "https?:..(www.)?animespirit.ru.anime."
     let videoFileUrlRegex = /dv\d+\.sibnet\.ru.*\.mp4\?st/
@@ -34,9 +34,9 @@ async function getVideoURlSibnet(videoObject){
 async function getVideoURlMuvi(videoObject){
     let videoId = videoObject.videoUrl.replace(/.*embed\/(.*)$/,"$1")
     let videoEmbedUrlRegex = `^https?:..www.myvi.tv.embed.${videoId}`
-    let videoEmbedSel = `iframe[src*='://www.myvi.tv/embed']`
+    let videoEmbedSel = `iframe[src*='www.myvi.tv/embed']`
     let playSel = "#player > div.player-splashscreen.player-element.player-show"
-    let videoFileUrlRegex = /https?:.*\.myvi.tv.*\/\d+\.mp4\?\&s=/
+    let videoFileUrlRegex = /https?:.*\.myvi.tv.*\/\d+\.mp4\?\&?.=/
     let catalogUrl = "https?:..(www.)?animespirit.ru.anime."
     
     wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
@@ -44,6 +44,22 @@ async function getVideoURlMuvi(videoObject){
     waitRequestInAdvance({urlRegex:videoFileUrlRegex, isOnBeforeRequest: true})
     click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
     let request = waitRequest({ urlRegex: videoFileUrlRegex, isOnBeforeRequest: true, waitTimout: 3000 })
+    return request.url
+}
+
+async function getVideoURlOurvideo(videoObject){
+    let videoId = videoObject.videoUrl.replace(/.*(flash|html)\/(.*)$/,"$2")
+    let videoEmbedUrlRegex = `^https?:..ourvideo.ru.player.embed.html.${videoId}`
+    let videoEmbedSel = `iframe[src*='ourvideo.ru/player/embed/html']`
+    let playSel = "#player > div.player-splashscreen.player-element.player-show"
+    let videoFileUrlRegex = /https?:.*\.myvi.tv.*\/\d+\.mp4\?\&?.=/
+    let catalogUrl = "https?:..(www.)?animespirit.ru.anime."
+    
+    wait({ selector: playSel, waitTimout: 25000, hrefRegex: videoEmbedUrlRegex })
+    sleep(500)
+    waitRequestInAdvance({urlRegex:videoFileUrlRegex, isOnBeforeRequest: true})
+    click({ selector: playSel, isTrusted: true, iframesSelectorInfo: [{ hrefRegex: catalogUrl, selector: videoEmbedSel }], hrefRegex: videoEmbedUrlRegex })
+    let request = waitRequest({ urlRegex: videoFileUrlRegex, isOnBeforeRequest: true, waitTimout: 20000 })
     return request.url
 }
 
@@ -72,10 +88,21 @@ async function expandSpoilerVideo(videoObject){
 async function getVideoURl(videoObject){
     expandSpoilerVideo(videoObject)
     let result = videoObject.videoUrl
+
+    sleep(300)
+    let src = executeScript(`document.querySelector("iframe").src`)
+    if (src.includes("ourvideo")){
+        videoObject.videoUrl = src
+    }
+    
     if (videoObject.videoUrl.includes("sibnet"))
         result = await getVideoURlSibnet(videoObject)
     else if (videoObject.videoUrl.includes("myvi"))
         result = await getVideoURlMuvi(videoObject)
+    else if (videoObject.videoUrl.includes("ourvideo.ru"))
+        result = await getVideoURlOurvideo(videoObject)
+    else
+        throw `${videoObject.videoUrl} not supported`
     collapseSpoiler(videoObject)
     sleep(100)
     return result
