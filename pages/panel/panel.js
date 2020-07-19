@@ -5,6 +5,7 @@ const scriptsInfo = [
     { text: "smotret-anime.online", value: "anime_365.js" },
     { text: "ts.kg", value: "ts_kg.js" },
     { text: "animespirit.ru", value: "animespirit.js" },
+    { text: "animespirit.cc", value: "animespirit.js" },
 ]
 
 // utils
