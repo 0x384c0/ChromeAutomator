@@ -19,8 +19,6 @@
 import { setupLogic } from './logic.ts';
 
 export default {
-  setup() {
-    return setupLogic();
-  }
+  setup: setupLogic,
 };
 </script>
