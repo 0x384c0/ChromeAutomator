@@ -1,5 +1,6 @@
 import { Storage } from '../modules/storage.js'
 import { Component, Vue, toNative } from 'vue-facing-decorator'
+
 @Component
 class PopupComponent extends Vue {
   private storage: Storage

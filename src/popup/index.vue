@@ -15,4 +15,4 @@
   </div>
 </template>
 
-<script src="./logic.ts"></script>
+<script src="./popup_component.ts"></script>
