@@ -1,32 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <base target="_blank">
     <title>Popup</title>
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <!-- Vue Material CSS -->
-    <link rel="stylesheet" href="/node_modules/vue-material/dist/vue-material.css">
-    <link rel="stylesheet" href="/node_modules/vue-material/dist/theme/default.css">
 </head>
 
-<body>
-    <div class="text_view">
-        <div> 
-            You will need the devtools "Crome Scrapper" panel opened.<br/>
-            Activate the devtools panel with F12 or Ctrl+Shift+J.<br/>
-            With the devtools open, find and select the "Crome Scrapper" tab from the top menu of the devtools.<br/>
-            You may need to press the ">>" in order to find it.
-        </div>
-    </div>
-    <div id="settings">
-        <md-switch v-model="isVerboseLogging" v-on:change="change">
-            Verbose Logging
-        </md-switch>
-    </div>
-    <!-- Vue and Vue Material JS -->
-    <script src="/node_modules/vue/dist/vue.min.js"></script>
-    <script src="/node_modules/vue-material/dist/vue-material.js"></script>
-    <script src="index.js"></script>
+<body style="min-width: 100px">
+    <div id="app"></div>
+    <script type="module" src="index.ts"></script>
 </body>
 
 </html>

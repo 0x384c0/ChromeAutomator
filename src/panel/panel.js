@@ -13,7 +13,6 @@ const requestListener = new RequestListener()
 const clicker = new Clicker(requestListener, onError)
 
 //UI Binding
-Vue.use(VueMaterial.default)
 const app = new Vue({
     el: '#app',
     data: {

@@ -10,11 +10,11 @@ export default defineManifest({
     "48": "img/logo-48.png",
     "128": "img/logo-128.png",
   },
-  devtools_page: "src/devtools/index.html",
   action: {
     default_popup: "src/popup/index.html",
     default_icon: "img/logo-48.png",
   },
+  devtools_page: "src/devtools/index.html",
   content_scripts: [
     {
       matches: ["<all_urls>"],
@@ -29,4 +29,5 @@ export default defineManifest({
     },
   ],
   permissions: ["debugger", "activeTab", "tabs", "storage", "webRequest"],
+  host_permissions: ["<all_urls>"], // Fix from https://github.com/crxjs/chrome-extension-tools/issues/971#issuecomment-2605091492
 });
