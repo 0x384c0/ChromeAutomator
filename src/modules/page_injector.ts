@@ -1,24 +1,26 @@
 export class PageInjector {
-    console_log(obj) {
+    isVerboseLogging: any;
+    lastInspectedWindowExecuteScriptResult: any;
+    console_log(obj: string) {
         if (this.isVerboseLogging)
             console.log(`Content Script: ${obj}`);
     }
 
-    injectScript(file) {
+    injectScript(file: string) {
         var th = (document.head || document.documentElement);
         if (this.isVerboseLogging) {
             let logFlag = document.createElement('script');
             logFlag.setAttribute('id', 'isVerboseLogging');
             th.appendChild(logFlag);
         }
-        var s = document.createElement('script');
-        s.setAttribute('type', 'text/javascript');
-        s.setAttribute('src', chrome.extension.getURL(file));
-        th.appendChild(s);
-        s.parentNode.removeChild(s);
+        var script = document.createElement('script');
+        script.setAttribute('type', 'text/javascript');
+        script.setAttribute('src', chrome.runtime.getURL(file));
+        th.appendChild(script);
+        if (script.parentNode != null) script.parentNode.removeChild(script);
     }
 
-    evalCodeInPage(code, sendResponse) {
+    evalCodeInPage(code: string, sendResponse: { (response?: any): void; (arg0: any): void; }) {
         this.console_log(">>> executeScript code: " + code);
         window.addEventListener('evalCodeInPageResult',
             function receiveResult(event) {
@@ -38,11 +40,10 @@ export class PageInjector {
         window.dispatchEvent(pageEvent);
     }
 
-    lastInspectedWindowExecuteScriptResult = null;
 
-    constructor(storage) {
+    constructor(storage: { getIsVerboseLogging: () => Promise<any>; }) {
         storage.getIsVerboseLogging()
-            .then((isVerboseLogging) => {
+            .then((isVerboseLogging: any) => {
                 this.isVerboseLogging = isVerboseLogging;
                 this.initialize();
             });

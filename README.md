@@ -49,8 +49,4 @@ waitRequest({ urlRegex: urlRegex, waitTimout: waitTimout })
 ### TODO:
 
 - fix script execution for Manivest V3
-- tabs.executeScript is deprecated, use only chrome.devtools.inspectedWindow.eval
-- add usage instructions in readme
-- add documentation for each function
-- add support for multiline statements
-- allow RegExp instead of string regex in all functions
+- use webext-bridge
