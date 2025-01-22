@@ -1,0 +1,38 @@
+{
+  "name": "chrome-extension-vanilla-ts",
+  "version": "0.0.0",
+  "author": "",
+  "description": "",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "chrome-extension",
+    "vanilla",
+    "vite",
+    "create-chrome-ext"
+  ],
+  "engines": {
+    "node": ">=14.18.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "fmt": "prettier --write '**/*.{ts,json,css,scss,md}'"
+  },
+  "dependencies": {
+    "file-saver": "^2.0.5",
+    "monaco-editor": "^0.52.2",
+    "vue": "^2.7.14",
+    "vue-material": "^1.0.0-beta-7"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^1.0.12",
+    "@types/chrome": "^0.0.236",
+    "@types/node": "^22.10.7",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4",
+    "vite": "^2.9.13",
+    "vite-plugin-zip-pack": "^1.0.5"
+  }
+}

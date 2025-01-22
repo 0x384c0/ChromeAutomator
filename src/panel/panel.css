@@ -1,0 +1,97 @@
+.root,
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.horisontal {
+  display: flex;
+  flex-flow: unset !important;
+}
+
+.code_bar {
+  height: 55px;
+}
+
+.grow {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.md-field {
+  max-width: 200px;
+}
+
+.state_label {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.output_frame {
+  height: 100px;
+  position: relative;
+}
+
+.output {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  overflow-y: scroll;
+}
+
+.right_top {
+  width: unset !important;
+  float: right;
+}
+
+.current_row_decoration {
+  color: black !important;
+  background: lightskyblue !important;
+  font-weight: bold;
+}
+
+.current_row_decoration_error {
+  color: black !important;
+  background: red !important;
+  font-weight: bold;
+}
+
+.current_row_decoration_complete {
+  color: black !important;
+  background: lightgreen !important;
+  font-weight: bold;
+}
+
+/* workarounds */
+
+.pre-formatted {
+  white-space: pre;
+}
+
+.md-tabs-content,
+.md-tabs-container,
+.md-tab,
+.md-tabs {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.md-tab-nav-button {
+  height: 35px !important;
+}
+
+#toolbar {
+  height: 50px !important;
+  min-height: 50px !important;
+}
+
+#copy_button {
+  width: 200px;
+}
