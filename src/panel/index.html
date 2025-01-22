@@ -2,35 +2,34 @@
 <meta charset="utf-8" />
 <html>
 
-<head>
-    <title>Panel</title>
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <link rel="stylesheet" href="/assets/css/roboto_icons.css">
-    <!-- Vue -->
-    <script src="/node_modules/vue/dist/vue.global.js"></script>
-    <!-- Monaco editor -->
-    <link rel="stylesheet" data-name="vs/editor/editor.main" href="/node_modules/monaco-editor/min/vs/editor/editor.main.css">
-    <script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/loader.js"></script>
-    <script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
-    <script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-    <!-- Libs -->
-    <script type="text/javascript" charset="utf-8" src="modules/Storage.js"></script>
-    <script type="text/javascript" charset="utf-8" src="modules/Logger.js"></script>
-    <script type="text/javascript" charset="utf-8" src="modules/Clicker.js"></script>
-    <script type="text/javascript" charset="utf-8" src="modules/RequestListener.js"></script>
-    <script type="text/javascript" charset="utf-8" src="/node_modules/file-saver/dist/FileSaver.min.js"></script>
-</head>
+<link rel="stylesheet" type="text/css" href="index.css">
+<link rel="stylesheet" href="/assets/css/roboto_icons.css">
+<!-- Vue -->
+<script src="/node_modules/vue/dist/vue.global.js"></script>
+<!-- Monaco editor -->
+<link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="/node_modules/monaco-editor/min/vs/editor/editor.main.css">
+<script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/loader.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+<script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
+<!-- Libs -->
+<script type="text/javascript" charset="utf-8" src="modules/Storage.js"></script>
+<script type="text/javascript" charset="utf-8" src="modules/Logger.js"></script>
+<script type="text/javascript" charset="utf-8" src="modules/Clicker.js"></script>
+<script type="text/javascript" charset="utf-8" src="modules/RequestListener.js"></script>
+<script type="text/javascript" charset="utf-8" src="/node_modules/file-saver/dist/FileSaver.min.js"></script>
 
 <body>
     <div id="app" class="root">
-
         <md-tabs md-alignment="centered" class="md-primary">
             <md-tab id="tab-code" md-label="code" class="root">
                 <div class="root vertical">
                     <md-toolbar id="toolbar">
                         <md-field>
                             <!-- md-selected="scriptFileChanged" -->
-                            <md-select v-model="selectedScript" @md-selected="didSelectedScript" name="script" placeholder="Edited script">
+                            <md-select v-model="selectedScript" @md-selected="didSelectedScript" name="script"
+                                placeholder="Edited script">
                                 <md-option v-for="selectScriptOption in selectScriptOptions"
                                     v-bind:value="selectScriptOption.value">{{ selectScriptOption.text }}</md-option>
                             </md-select>
@@ -69,8 +68,6 @@
                 <div class="pre-formatted output">{{ logs }}</div>
             </md-tab>
         </md-tabs>
-
-
     </div>
     <script type="text/javascript" charset="utf-8" src="index.js"></script>
 </body>

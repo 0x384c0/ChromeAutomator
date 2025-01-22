@@ -51,7 +51,7 @@ export class PageInjector {
 
     initialize() {
         this.console_log("init onMessage window.location.href: " + window.location.href);
-        this.injectScript('library/modules/pageScript.js');
+        this.injectScript('/src/modules/pageScript.js'); // TODO: fix for manifest v3
 
         //Listen for runtime message
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
