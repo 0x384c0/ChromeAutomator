@@ -9,16 +9,10 @@
       </div>
     </div>
     <div id="settings">
-      <input type="checkbox" id="checkbox" v-model="isVerboseLogging" @change="change" />
+      <input type="checkbox" id="checkbox" v-model="isVerboseLogging" @change="isVerboseLoggingChange" />
       <label for="checkbox">Verbose Logging</label>
     </div>
   </div>
 </template>
 
-<script>
-import { setupLogic } from './logic.ts';
-
-export default {
-  setup: setupLogic,
-};
-</script>
+<script src="./logic.ts"></script>

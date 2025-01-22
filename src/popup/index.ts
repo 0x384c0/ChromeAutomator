@@ -1,12 +1,6 @@
-import { createApp, defineComponent, h } from 'vue';
-import App from './index.vue';
-import { setupLogic } from './logic.js';
-import './index.css';
+import { createApp, defineComponent, h } from 'vue'
+import App from './index.vue'
+import './index.css'
 
-const appComponent = defineComponent({
-    setup: setupLogic,
-    render: () => h(App)
-});
-
-const app = createApp(appComponent);
+const app = createApp(App);
 app.mount('#app');

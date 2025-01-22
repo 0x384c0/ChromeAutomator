@@ -1,26 +1,22 @@
-import { ref, onMounted } from 'vue';
-import { Storage } from '../modules/storage.js';
+import { Storage } from '../modules/storage.js'
+import { Component, Vue, toNative } from 'vue-facing-decorator'
+@Component
+class PopupComponent extends Vue {
+  private storage: Storage
+  public isVerboseLogging = false
 
-export function setupLogic() {
-  const storage = new Storage();
-  const isVerboseLogging = ref(false);
+  isVerboseLoggingChange(): void {
+    this.storage.setIsVerboseLogging(this.isVerboseLogging)
+  }
 
-  const change = () => {
-    storage.setIsVerboseLogging(isVerboseLogging.value);
-  };
+  mounted(): void {
+    this.init()
+  }
 
-  const init = async () => {
-    const isVerbose = await storage.getIsVerboseLogging();
-    console.log('isVerbose: ' + isVerbose);
-    isVerboseLogging.value = isVerbose;
-  };
-
-  onMounted(() => {
-    init();
-  });
-
-  return {
-    isVerboseLogging,
-    change
-  };
+  private async init(): Promise<void> {
+    this.storage = new Storage()
+    this.isVerboseLogging = await this.storage.getIsVerboseLogging()
+  }
 }
+
+export default toNative(PopupComponent)
