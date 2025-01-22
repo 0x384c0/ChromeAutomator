@@ -1,75 +1,15 @@
 <!DOCTYPE html>
-<meta charset="utf-8" />
 <html>
 
-<link rel="stylesheet" type="text/css" href="index.css">
-<link rel="stylesheet" href="/assets/css/roboto_icons.css">
-<!-- Vue -->
-<script src="/node_modules/vue/dist/vue.global.js"></script>
-<!-- Monaco editor -->
-<link rel="stylesheet" data-name="vs/editor/editor.main"
-    href="/node_modules/monaco-editor/min/vs/editor/editor.main.css">
-<script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/loader.js"></script>
-<script type="text/javascript" charset="utf-8"
-    src="/node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
-<script type="text/javascript" charset="utf-8" src="/node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-<!-- Libs -->
-<script type="text/javascript" charset="utf-8" src="modules/Storage.js"></script>
-<script type="text/javascript" charset="utf-8" src="modules/Logger.js"></script>
-<script type="text/javascript" charset="utf-8" src="modules/Clicker.js"></script>
-<script type="text/javascript" charset="utf-8" src="modules/RequestListener.js"></script>
-<script type="text/javascript" charset="utf-8" src="/node_modules/file-saver/dist/FileSaver.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <base target="_blank">
+    <title>Popup</title>
+</head>
 
 <body>
-    <div id="app" class="root">
-        <md-tabs md-alignment="centered" class="md-primary">
-            <md-tab id="tab-code" md-label="code" class="root">
-                <div class="root vertical">
-                    <md-toolbar id="toolbar">
-                        <md-field>
-                            <!-- md-selected="scriptFileChanged" -->
-                            <md-select v-model="selectedScript" @md-selected="didSelectedScript" name="script"
-                                placeholder="Edited script">
-                                <md-option v-for="selectScriptOption in selectScriptOptions"
-                                    v-bind:value="selectScriptOption.value">{{ selectScriptOption.text }}</md-option>
-                            </md-select>
-                        </md-field>
-                        <md-button v-if="!is_working && !is_stopping" v-on:click="start" class="md-raised md-accent">
-                            <md-icon id="menu_icon">play_arrow</md-icon>
-                        </md-button>
-                        <md-button v-if="is_working && !is_stopping" v-on:click="stop" class="md-raised md-accent">
-                            <md-icon id="menu_icon">stop</md-icon>
-                        </md-button>
-                        <div v-if="is_stopping" class="md-title state_label">Stopping...</div>
-                        <md-switch v-model="isHighlighCurrentLine">
-                            Highligh current line
-                        </md-switch>
-                        <div class="grow"></div>
-                        <md-button v-on:click="reloadPage">
-                            Restart
-                        </md-button>
-                    </md-toolbar>
-                    <div id="container" class="grow"></div>
-                    <div class="output_frame">
-                        <div id="output" class="pre-formatted output">{{ output }}</div>
-                        <md-toolbar class="right_top horisontal">
-                            <md-field>
-                                <label>File name</label>
-                                <md-input v-model="save_filename"></md-input>
-                            </md-field>
-                            <md-button v-on:click="save_output" class="md-raised md-accent">Save</md-button>
-                            <md-button v-on:click="copy_output" id="copy_button">Copy to clipboard</md-button>
-                            <md-button v-on:click="clear_output" id="clear_output_button">Clear</md-button>
-                        </md-toolbar>
-                    </div>
-                </div>
-            </md-tab>
-            <md-tab id="tab-logs" md-label="logs">
-                <div class="pre-formatted output">{{ logs }}</div>
-            </md-tab>
-        </md-tabs>
-    </div>
-    <script type="text/javascript" charset="utf-8" src="index.js"></script>
+    <div id="app"></div>
+    <script type="module" src="index.ts"></script>
 </body>
 
 </html>
