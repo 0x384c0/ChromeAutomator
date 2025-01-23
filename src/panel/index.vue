@@ -15,7 +15,7 @@
                     <div id="editor-container" class="monaco-editor"></div>
                 </div>
             </pane>
-            <pane min-size="10">
+            <pane size="20" min-size="10">
                 <Output :content="outputText" @clear="clearOutputText" class="output-container" />
             </pane>
         </splitpanes>
@@ -70,7 +70,6 @@ export default {
 }
 
 .output-container {
-    flex: 0 0 20%;
     width: 100%;
 }
 </style>
