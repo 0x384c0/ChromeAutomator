@@ -1,9 +1,9 @@
 <template>
     <div class="output-wrapper">
         <div>
-            <button @click="saveToFile">Save to file</button>
-            <button @click="copyToClipboard">Copy</button>
-            <button @click="$emit('clear')">Clear</button>
+            <Button @click="saveToFile">Save to file</Button>
+            <Button @click="copyToClipboard">Copy</Button>
+            <Button @click="$emit('clear')">Clear</Button>
         </div>
         <textarea 
             readonly

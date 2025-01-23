@@ -5,9 +5,9 @@
                 <div class="editor-wrapper">
                     <div class="controls">
                         <Dropdown v-model="selectedScriptTemplate" :options="scriptTemplates" />
-                        <button v-if="!isWorking && !isStopping" @click="start">Play</button>
-                        <button v-if="isWorking && !isStopping" @click="stop">Stop</button>
-                        <button v-if="isWorking && !isStopping" @click="restart">Restart</button>
+                        <Button class="p-button" v-if="!isWorking && !isStopping" @click="start">Play</Button>
+                        <Button class="p-button" v-if="isWorking && !isStopping" @click="stop">Stop</Button>
+                        <Button class="p-button" v-if="isWorking && !isStopping" @click="restart">Restart</Button>
                         <input type="checkbox" v-model="isHighlighCurrentLine" @change="isHighlighCurrentLineChange">
                         Highligh current line</input>
                         <div v-if="isStopping">Stopping...</div>
@@ -23,10 +23,11 @@
 </template>
 
 <script>
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
 
+import 'splitpanes/dist/splitpanes.css'
 import { setupLogic } from './logic.ts';
+
+import { Splitpanes, Pane } from 'splitpanes'
 import Dropdown from './components/Dropdown.vue';
 import Output from './components/Output.vue';
 

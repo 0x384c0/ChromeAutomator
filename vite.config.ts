@@ -4,6 +4,8 @@ import zipPack from "vite-plugin-zip-pack";
 import manifest from "./src/manifest";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
+import Components from 'unplugin-vue-components/vite'
+import { PrimeVueResolver } from '@primevue/auto-import-resolver'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -31,6 +33,11 @@ export default defineConfig({
       outFileName: `${manifest.name.replaceAll(" ", "-")
         }-extension-v${manifest.version}.zip`,
     }),
+    Components({
+      resolvers: [
+        PrimeVueResolver()
+      ]
+    })
   ],
   legacy: {
     skipWebSocketTokenCheck: true, // https://github.com/crxjs/chrome-extension-tools/issues/971#issuecomment-2605091492
