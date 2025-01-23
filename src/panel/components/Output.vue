@@ -1,17 +1,16 @@
 <template>
-    <div>
+    <div class="output-wrapper">
         <div>
             <button @click="saveToFile">Save to file</button>
             <button @click="copyToClipboard">Copy</button>
             <button @click="$emit('clear')">Clear</button>
         </div>
-        <div>
-            <textarea 
-                readonly
-                :value="content"
-                rows="10"
-            ></textarea>
-        </div>
+        <textarea 
+            readonly
+            :value="content"
+            rows="10"
+            class="output-textarea"
+        ></textarea>
     </div>
 </template>
 
@@ -49,3 +48,19 @@ export default defineComponent({
     }
 })
 </script>
+
+<style scoped>
+.output-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.output-textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    box-sizing: border-box;
+}
+</style>

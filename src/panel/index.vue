@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div>
+        <div class="buttons-container">
             <Dropdown v-model="selectedScriptTemplate" :options="scriptTemplates" />
             <button v-if="!isWorking && !isStopping" @click="start">
                 Play
@@ -19,6 +19,7 @@
         <Output 
             :content="outputText"
             @clear="clearOutputText"
+            class="output-container"
         />
     </div>
 </template>
@@ -38,6 +39,21 @@ export default {
 </script>
 
 <style>
+.buttons-container {
+    flex: 0 0 auto;
+    padding: 8px;
+}
+
+.monaco-editor {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.output-container {
+    flex: 0 0 20%;
+    width: 100%;
+}
+
 .monaco-editor {
     width: 100%;
     height: 500px;
