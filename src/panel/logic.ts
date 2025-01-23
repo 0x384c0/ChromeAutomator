@@ -1,5 +1,6 @@
 import { onMounted } from 'vue';
 import * as monaco from 'monaco-editor';
+import { start } from 'repl';
 
 
 export function setupLogic() {
@@ -8,10 +9,28 @@ export function setupLogic() {
     });
 
     return {
-        is_working: false,
-        is_stopping: false,
+        isWorking: false,
+        isStopping: false,
+        selectedScriptTemplate: scriptTemplates[0].value,
+        scriptTemplates: scriptTemplates,
+        isHighlighCurrentLine: false,
+        outputText: 'outputText',
+        clearOutputText: () => {
+            console.log('clearOutputText')
+        },
+        isHighlighCurrentLineChange: (event: Event) => {
+            const checkbox = event.target as HTMLInputElement;
+            const isChecked = checkbox.checked;
+            console.log('isHighlighCurrentLineChange:', isChecked);
+        },
         start: () => {
-            console.log('start');
+            console.log('start')
+        },
+        stop: () => {
+            console.log('stop')
+        },
+        restart: () => {
+            console.log('restart')
         }
     };
 }
@@ -254,19 +273,19 @@ async function initEditor() {
 
 // //constants
 const templateName = "template script"
-const scriptsInfo = [
-    { text: templateName, value: "template.js" },
-    { text: "smotret-anime.online", value: "anime_365.js" },
-    { text: "ts.kg", value: "ts_kg.js" },
-    { text: "animespirit.ru", value: "animespirit.js" },
-    { text: "animespirit.cc", value: "animespirit.js" },
+const scriptTemplates = [
+    { label: templateName, value: "template.js" },
+    { label: "smotret-anime.online", value: "anime_365.js" },
+    { label: "ts.kg", value: "ts_kg.js" },
+    { label: "animespirit.ru", value: "animespirit.js" },
+    { label: "animespirit.cc", value: "animespirit.js" },
 ]
 
 function autoSelectTemplate() {
     chrome.tabs.get(chrome.devtools.inspectedWindow.tabId, (tab) => {
         const scriptsMap = {}
-        for (let scriptInfo of scriptsInfo) {
-            scriptsMap[scriptInfo.text] = scriptInfo.value
+        for (let scriptInfo of scriptTemplates) {
+            scriptsMap[scriptInfo.label] = scriptInfo.value
         }
         const pageUrl = tab.url
         if (pageUrl == null) return
