@@ -20,6 +20,7 @@
   "dependencies": {
     "file-saver": "^2.0.5",
     "monaco-editor": "^0.52.2",
+    "splitpanes": "^3.1.8",
     "vue": "^3.5.13",
     "vue-facing-decorator": "^3.0.4"
   },
@@ -27,6 +28,7 @@
     "@crxjs/vite-plugin": "^2.0.0-beta.30",
     "@types/chrome": "^0.0.236",
     "@types/node": "^22.5.0",
+    "@types/splitpanes": "^2.2.6",
     "@vitejs/plugin-vue": "^5.2.1",
     "crx": "^5.0.1",
     "typescript": "^5.5.4",
