@@ -1,5 +1,6 @@
 import { onMounted } from 'vue';
 import * as monaco from 'monaco-editor';
+import { usePrimeVue } from 'primevue/config';
 
 
 export function setupLogic() {
@@ -249,6 +250,9 @@ let editor: monaco.editor.IStandaloneCodeEditor;
 
 async function initEditor() {
 
+    const primevue = usePrimeVue()
+    const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    monaco.editor.setTheme(isDarkTheme ? 'vs-dark' : 'vs-light');
 
     if (editor == undefined) {
         let element = document.getElementById('editor-container') as HTMLElement;
