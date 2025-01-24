@@ -4,6 +4,7 @@
             <div class="flex flex-column h-full">
                 <Toolbar style="border-radius: 0">
                     <template #start>
+                        <Dropdown v-model="selectedScript" :options="scripts" optionLabel="label" placeholder="Select a Script" class="mr-2" />
                         <Button icon="pi pi-play" class="mr-2" :disabled="isWorking || isStopping" @click="start" />
                         <Button icon="pi pi-stop" class="mr-2" :disabled="!isWorking || isStopping" @click="stop" />
                         <Button icon="pi pi-refresh" class="mr-2" :disabled="!isWorking || isStopping"
@@ -33,12 +34,10 @@
 
 <script>
 import { setupLogic } from './logic.ts';
-import Dropdown from './components/Dropdown.vue';
 import Output from './components/Output.vue';
 
 export default {
     components: {
-        Dropdown,
         Output,
     },
     setup: setupLogic,
