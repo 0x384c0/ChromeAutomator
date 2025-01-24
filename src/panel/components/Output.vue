@@ -9,7 +9,7 @@
                 </div>
             </template>
         </Toolbar>
-        <textarea readonly :value="content" rows="10" class="output-textarea"></textarea>
+        <Textarea style="border-radius: 0" readonly :value="content" class="output-textarea"></Textarea>
     </div>
 </template>
 

@@ -1,6 +1,5 @@
 import { onMounted } from 'vue';
 import * as monaco from 'monaco-editor';
-import { start } from 'repl';
 
 
 export function setupLogic() {
@@ -14,7 +13,7 @@ export function setupLogic() {
         selectedScriptTemplate: scriptTemplates[0].value,
         scriptTemplates: scriptTemplates,
         isHighlighCurrentLine: false,
-        outputText: 'outputText',
+        outputText: 'Example output code \n'.repeat(50),
         clearOutputText: () => {
             console.log('clearOutputText')
         },
@@ -254,7 +253,7 @@ async function initEditor() {
     if (editor == undefined) {
         let element = document.getElementById('editor-container') as HTMLElement;
         editor = monaco.editor.create(element, {
-            value: '// Type your code here',
+            value: '// Example code \n'.repeat(50),
             language: 'javascript',
             automaticLayout: true
         });
