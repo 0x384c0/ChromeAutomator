@@ -1,7 +1,7 @@
 <template>
-    <Splitter class="panel-container" layout="vertical">
+    <Splitter class="full-screen-container" layout="vertical">
         <SplitterPanel :minSize="10">
-            <div class="editor-wrapper">
+            <div class="flex flex-column h-full">
                 <Toolbar style="border-radius: 0">
                     <template #start>
                         <Button icon="pi pi-play" class="mr-2" :disabled="isWorking || isStopping" @click="start" />
@@ -22,11 +22,11 @@
                         </div>
                     </template>
                 </Toolbar>
-                <div id="editor-container" class="monaco-editor"></div>
+                <div id="editor-container" class="flex flex-column h-full w-full"></div>
             </div>
         </SplitterPanel>
         <SplitterPanel :size="20" :minSize="10">
-            <Output :content="outputText" @clear="clearOutputText" class="output-container" />
+            <Output :content="outputText" @clear="clearOutputText" class="w-full" />
         </SplitterPanel>
     </Splitter>
 </template>
@@ -46,34 +46,12 @@ export default {
 </script>
 
 <style>
-.panel-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+.full-screen-container {
+    height: screen;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-}
-
-.controls {
-    flex: 0 0 auto;
-}
-
-.editor-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.monaco-editor {
-    flex: 1 1 auto;
-    width: 100%;
-}
-
-.output-container {
-    width: 100%;
 }
 </style>

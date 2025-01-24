@@ -1,5 +1,5 @@
 <template>
-    <div class="output-wrapper">
+    <div class="flex-column h-full w-full">
         <Toolbar style="border-radius: 0">
             <template #start>
                 <div>
@@ -9,7 +9,9 @@
                 </div>
             </template>
         </Toolbar>
-        <Textarea style="border-radius: 0" readonly :value="content" class="output-textarea"></Textarea>
+        <ScrollPanel class="h-full w-full px-2">
+            <pre><code>{{ content }}</code></pre>
+        </ScrollPanel>
     </div>
 </template>
 
@@ -48,19 +50,3 @@ export default defineComponent({
     }
 })
 </script>
-
-<style scoped>
-.output-wrapper {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.output-textarea {
-    width: 100%;
-    height: 100%;
-    resize: none;
-    box-sizing: border-box;
-}
-</style>

@@ -14,7 +14,7 @@ export function setupLogic() {
         selectedScriptTemplate: scriptTemplates[0].value,
         scriptTemplates: scriptTemplates,
         isHighlighCurrentLine: false,
-        outputText: 'Example output code \n'.repeat(50),
+        outputText: 'Example output code\n'.repeat(50),
         clearOutputText: () => {
             console.log('clearOutputText')
         },
