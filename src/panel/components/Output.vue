@@ -1,21 +1,21 @@
 <template>
     <div class="output-wrapper">
-        <div>
-            <Button @click="saveToFile">Save to file</Button>
-            <Button @click="copyToClipboard">Copy</Button>
-            <Button @click="$emit('clear')">Clear</Button>
-        </div>
-        <textarea 
-            readonly
-            :value="content"
-            rows="10"
-            class="output-textarea"
-        ></textarea>
+        <Toolbar style="border-radius: 0">
+            <template #start>
+                <div>
+                    <Button class="mr-2" @click="saveToFile">Save to file</Button>
+                    <Button class="mr-2" text @click="copyToClipboard">Copy</Button>
+                    <Button text @click="$emit('clear')">Clear</Button>
+                </div>
+            </template>
+        </Toolbar>
+        <textarea readonly :value="content" rows="10" class="output-textarea"></textarea>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import '/node_modules/primeflex/primeflex.css'
 
 export default defineComponent({
     name: 'Output',

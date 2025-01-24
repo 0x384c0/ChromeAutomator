@@ -25,19 +25,18 @@ export default defineConfig({
 
   plugins: [
     vue(),
+    Components({
+      resolvers: [
+        PrimeVueResolver()
+      ]
+    }),
     crx({ manifest }),
     zipPack({
       outDir: `package`,
       inDir: "build",
       // @ts-ignore
-      outFileName: `${manifest.name.replaceAll(" ", "-")
-        }-extension-v${manifest.version}.zip`,
+      outFileName: `${manifest.name.replaceAll(" ", "-")}-extension-v${manifest.version}.zip`,
     }),
-    Components({
-      resolvers: [
-        PrimeVueResolver()
-      ]
-    })
   ],
   legacy: {
     skipWebSocketTokenCheck: true, // https://github.com/crxjs/chrome-extension-tools/issues/971#issuecomment-2605091492
