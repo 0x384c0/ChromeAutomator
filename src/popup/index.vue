@@ -2,7 +2,7 @@
   <div>
     <div class="text_view mb-3">
       Activate the devtools panel with F12 or Ctrl+Shift+J.<br />
-      Find and select the "Crome Scrapper" tab from the top menu of the devtools.<br />
+      Find and select the "Crome Automator" tab from the top menu of the devtools.<br />
     </div>
     <div class="flex align-items-center">
       <InputSwitch type="checkbox" id="checkbox" v-model="isVerboseLogging" @change="isVerboseLoggingChange" />

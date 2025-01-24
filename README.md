@@ -1,4 +1,4 @@
-# ChromeScraper
+# ChromeAutomator
 
 Automated bot for web scraping. (Chrome extension)
 

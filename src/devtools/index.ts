@@ -1,5 +1,5 @@
 chrome.devtools.panels.create(
-    "Chrome Scraper", 
+    "Chrome Automator", 
     "img/logo-16.png", 
     "src/panel/index.html",
 );

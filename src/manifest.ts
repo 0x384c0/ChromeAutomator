@@ -3,7 +3,7 @@ import { defineManifest } from "@crxjs/vite-plugin";
 export default defineManifest({
   manifest_version: 3,
   version: "0.0.1",
-  name: "Chrome Scraper",
+  name: "Chrome Automator",
   description: "Tools for scrape data from web",
   icons: {
     "16": "img/logo-16.png",
